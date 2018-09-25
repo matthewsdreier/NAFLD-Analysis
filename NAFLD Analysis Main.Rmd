@@ -9,6 +9,8 @@ output:
 
 ```{r setup, include=FALSE}
 print("test")
+
+print("test2")
 ```
 
 ## R Markdown
