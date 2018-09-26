@@ -1,7 +1,15 @@
 # NAFLD-Analysis
 
-Analysis of NAFLD Experiments
+##Benedikt Hild and Matthew Dreier
 
-R code for analysis is stored here.
+####This repository contains analysis of data from the NAFLD experiments.
 
-This is a line from R Studio.
+####Instructions
+
+In order to update the repository:
+
+1. Before you begin work, select pull from the Git menu to update with current changes.
+2. Make changes on your local computer using R Studio.
+3. Save changes locally, as you would normally save.
+4. Commit changes by selecting staging altered documents and clicking "commit" from the Git menu.
+5. Pull and then push your changes to the repository.
