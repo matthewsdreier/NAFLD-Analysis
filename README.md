@@ -1,10 +1,10 @@
 # NAFLD-Analysis
 
-##Benedikt Hild and Matthew Dreier
+## Benedikt Hild and Matthew Dreier
 
-####This repository contains analysis of data from the NAFLD experiments.
+#### This repository contains analysis of data from the NAFLD experiments.
 
-####Instructions
+#### Instructions
 
 In order to update the repository:
 
