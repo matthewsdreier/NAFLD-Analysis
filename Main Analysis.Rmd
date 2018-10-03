@@ -1,0 +1,257 @@
+---
+title: "Binning of Weight"
+author: "Benedikt Hild"
+date: "9/17/2018"
+output: html_document
+---
+
+```{r setup, eval = TRUE, echo = FALSE, message = FALSE, warning = FALSE}
+
+setwd("~/Desktop/Research/NAFLD/Experiments/All Experiments togehter")
+library(ggplot2)
+library(gdata)
+library(rlist)
+library(ggpubr)
+library(gridBase)
+library(gridExtra)
+#installation of ggpubr, according to websitehttp://www.sthda.com/english/articles/24-ggpubr-publication-ready-plots/81-ggplot2-easy-way-to-mix-multiple-graphs-on-the-same-page/
+
+cd <- read.csv("AllExp.csv")
+
+
+#Change Date to custome date of R programm, no need now, format is already fine
+cd$Date <- as.Date(cd$Date, "%m/%d/%y")
+
+#for calculating days after starting the exp
+for (sex in unique(cd$Gender)){
+
+  for (Days in unique(cd$Experiment)) {
+  
+    for (Days2 in unique(cd$Microbiome)) {
+    
+    lowdate <- min(cd$Date[cd$Experiment == Days & cd$Microbiome == Days2 & cd$Gender == sex])
+  
+    cd$Days[cd$Experiment == Days & cd$Microbiome == Days2& cd$Gender == sex] <- cd$Date[cd$Experiment == Days & cd$Microbiome == Days2 & cd$Gender == sex] - lowdate
+    }
+  }
+}
+
+minval <- min(cd$Weight[cd$Gender == "Female"], na.rm = TRUE)
+maxval <- max(cd$Weight[cd$Gender == "Female"], na.rm = TRUE)
+
+minvalmales <- min(cd$Weight[cd$Gender == "Male"], na.rm = TRUE)
+maxvalmales <- max(cd$Weight[cd$Gender == "Male"], na.rm = TRUE)
+
+maxdays <- max(cd$Days[cd$Gender == "Female"], na.rm = TRUE)
+maxdaysmales <- max(cd$Days[cd$Gender == "Male"], na.rm = TRUE)
+mindays <- min(cd$Days, na.rm = TRUE)
+sex <- "Female"
+sex2 <- "Male"
+
+cd$UID <- NA
+cd$Temp <- paste(cd$Experiment, cd$Microbiome, cd$Food, cd$Cage, cd$Mouse, cd$Gender)
+
+for (mouse in unique(cd$Temp)) {
+  mouse.list <- as.vector(strsplit(mouse, " ")[[1]])
+ 
+  microbiome <- "2"
+  if (mouse.list[2] == "Wild") {
+   
+    microbiome <- "1"
+   
+        }
+ 
+  food <- "2"
+  if (mouse.list[3] == "Fat") {
+   
+    food <- "1"
+   
+  }
+  
+  gender <- "2"
+  
+  if (mouse.list[6] == "Female") {
+    gender <- "1"
+    
+  }
+ 
+  uid <- paste0(gender, mouse.list[1], microbiome, food, mouse.list[4], mouse.list[5])
+ 
+  cd$UID[cd$Temp == mouse] <- as.numeric(uid)
+ 
+}
+ 
+#create a new variable for proportional weight
+cd$PropWeight <- NA
+ 
+#loop through each mouse with UID
+for (mouse in unique(cd$UID)) {
+ 
+  #find minimum day (start day) and minimum weight (on start day)
+  minDay <- min(cd$Day[cd$UID == mouse])
+  minWeight <- cd$Weight[cd$UID == mouse & cd$Day == minDay]
+ 
+  #find and save proportional weight for the current mouse
+  cd$PropWeight[cd$UID == mouse] <- cd$Weight[cd$UID == mouse] / minWeight
+ 
+}
+#create a new variable for proportional glucose
+cd$PropGlucose <- NA
+ 
+#loop through each mouse with UID
+for (mouse in unique(cd$UID)) {
+ 
+  #find minimum day (start day) and minimum weight (on start day)
+  minDay <- min(cd$Day[cd$UID == mouse])
+  minGlucose <- cd$Glucose[cd$UID == mouse & cd$Day == minDay]
+ 
+  #find and save proportional weight for the current mouse
+  cd$PropGlucose[cd$UID == mouse] <- cd$Glucose[cd$UID == mouse] / minGlucose
+ 
+}
+
+#create a new variable for proportional glucose
+cd$PropTemp <- NA
+ 
+#loop through each mouse with UID
+for (mouse in unique(cd$UID)) {
+ 
+  #find minimum day (start day) and minimum weight (on start day)
+  minTemp <- logical(0)
+  minDay <- 0
+  while (length(minTemp) == 0) {
+    minDay <- minDay + 1
+    minTemp <- cd$Temperature[cd$UID == mouse & cd$Day == minDay]
+  }
+
+ 
+  #find and save proportional weight for the current mouse
+  cd$PropTemp[cd$UID == mouse] <- cd$Temperature[cd$UID == mouse] / minTemp
+ 
+}
+
+#Plot proportional weight gain of all mice
+
+cd$Color <- paste(cd$Microbiome, cd$Food)
+
+cdFemale <- subset(cd, cd$Gender == "Female")
+
+plotPropWeightFemale <- ggplot(cdFemale, aes(x = cdFemale$Days, y = cdFemale$PropWeight, color = cdFemale$Color)) +
+                                 geom_smooth() +
+  scale_x_continuous(breaks=seq(0,maxdays, 7), limits = c(mindays, maxdays)) +
+ # xlim(c(mindays, maxdays)) +
+  xlab("Days") +
+  ylab("Weight [gr]") +
+  scale_colour_manual("", values = c("darkturquoise","goldenrod1", "blue3", "darkolivegreen4"), breaks = c("Lab Chow", "Lab Fat", "Wild Chow", "Wild Fat")) +
+  theme_set(theme_bw(base_size = 20) ) +
+    theme(plot.title = element_text(hjust = 0.5)) +
+      ggtitle("Weight over Time")
+
+  
+
+#Plot proportional glucose gain of all mice
+
+cd$Color <- paste(cd$Microbiome, cd$Food)
+
+cdFemale <- subset(cd, cd$Gender == "Female")
+
+plotPropGlucoseFemale <- ggplot(cdFemale, aes(x = cdFemale$Days, y = cdFemale$PropGlucose, color = cdFemale$Color)) +
+                                 geom_smooth() +
+  scale_x_continuous(breaks=seq(0,maxdays, 7), limits = c(mindays, maxdays)) +
+ # xlim(c(mindays, maxdays)) +
+  xlab("Days") +
+  ylab("Glucose [mg/dl]") +
+  scale_colour_manual("", values = c("darkturquoise","goldenrod1", "blue3", "darkolivegreen4"), breaks = c("Lab Chow", "Lab Fat", "Wild Chow", "Wild Fat")) +
+  theme_set(theme_bw(base_size = 20) ) +
+    theme(plot.title = element_text(hjust = 0.5)) +
+      ggtitle("Glucoese over Time")
+
+  
+
+#Plot proportional TEMPERATURE gain of all mice
+
+cd$Color <- paste(cd$Microbiome, cd$Food)
+
+cdFemale <- subset(cd, cd$Gender == "Female")
+
+plotPropTemperatureFemale <- ggplot(cdFemale, aes(x = cdFemale$Days, y = cdFemale$PropTemp, color = cdFemale$Color)) +
+                                 geom_smooth() +
+  scale_x_continuous(breaks=seq(0,maxdays, 7), limits = c(mindays, maxdays)) +
+ # xlim(c(mindays, maxdays)) +
+  xlab("Days") +
+  ylab("Temperature[C]") +
+  scale_colour_manual("", values = c("darkturquoise","goldenrod1", "blue3", "darkolivegreen4"), breaks = c("Lab Chow", "Lab Fat", "Wild Chow", "Wild Fat")) +
+  theme_set(theme_bw(base_size = 20) ) +
+    theme(plot.title = element_text(hjust = 0.5)) +
+      ggtitle("Temperature over Time")
+
+print(plotPropWeightFemale)
+  
+print(plotPropGlucoseFemale)  
+print(plotPropTemperatureFemale)  
+
+cd$WeightBin <- FALSE
+
+cd$WeightBin[cd$PropWeight > 1.25] <- TRUE
+
+FatWildHigh <- subset(cd, cd$WeightBin == TRUE & cd$Microbiome == "Wild" & cd$Food == "Fat" & cd$Days == "31")
+
+cd$WeightBin[cd$PropWeight < 1.25] <- TRUE
+
+FatWildLow <- subset(cd, cd$WeightBin == TRUE & cd$Microbiome == "Wild" & cd$Food == "Fat" & cd$Days == "31")
+
+for (microbiome in unique(cd$Microbiome)){
+  
+  for(food in unique(cd$Food)){
+    
+    temp <- subset(cd, cd$Weight[cd$Microbiome == "Wild" & cd$Food == "Fat"])
+    
+    HistoWeight <- ggplot(data = temp, aes(temp$Weight)) +
+      geom_histogram()
+
+print(HistoWeight)
+  }
+}
+
+HistoWeight <- ggplot(data = cd, aes(cd$Weight)) +
+  geom_histogram()
+
+print(HistoWeight)
+
+for (histo in unique(cd$Days)){
+  
+  day <- subset(cd, cd$Days > "30")
+  
+  histogrammweight <- ggplot(data = cd, aes(y = cd$Weight))+
+    geom_histogram()
+  
+  
+}
+
+
+print(histogrammweight)
+
+
+for (sex in unique(cd$Gender)) {
+  for (microbiome in unique(cd$Microbiome)) {
+    for (food in unique(cd$Food)) {
+      
+      sub <- subset(cd, cd$Gender == sex & cd$Microbiome == microbiome & cd$Food == food)
+      
+      model <- lm(sub$Weight~sub$Temperature)
+      
+      p <- ggplot(data = sub, aes(x = sub$Temperature, y = sub$Weight, color = sub$Days)) + geom_point() + geom_abline(aes(intercept = as.numeric(model[[1]][1]), slope = as.numeric(model[[1]][2]))) + labs(x = "Temperature", y = "Weight", title = paste(sex, microbiome, food), subtitle = paste("Pearson Correlation: ", as.numeric(cor.test(sub$Temperature, sub$Weight)[4]), ", p = ", as.numeric(cor.test(sub$Temperature, sub$Weight)[3])))
+      
+      print(p)
+      
+      p2 <- ggplot(data = sub, aes(x = sub$UID, y = sub$Weight, color = sub$Days)) + geom_point()
+      
+      print(unique(sub$UID))
+      
+      print(p2)
+      
+    }
+  }
+}
+
+```
