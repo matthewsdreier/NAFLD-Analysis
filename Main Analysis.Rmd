@@ -1,36 +1,60 @@
 ---
-title: "Binning of Weight"
-author: "Benedikt Hild"
+title: "NAFLD Study Data Anaylsis"
+author: "Benedikt Hild and Matthew Dreier"
 date: "9/17/2018"
 output: html_document
+  keep_md: TRUE
 ---
 
-```{r setup, eval = TRUE, echo = FALSE, message = FALSE, warning = FALSE}
+```{r setup, eval = TRUE, include = TRUE}
 
-setwd("~/Desktop/Research/NAFLD/Experiments/All Experiments togehter")
+#load packages
 library(ggplot2)
 library(gdata)
 library(rlist)
 library(ggpubr)
 library(gridBase)
 library(gridExtra)
-#installation of ggpubr, according to websitehttp://www.sthda.com/english/articles/24-ggpubr-publication-ready-plots/81-ggplot2-easy-way-to-mix-multiple-graphs-on-the-same-page/
 
+##function to change names of columns
+changeColName <- function(df, oldName, newName) {
+  
+  #if the oldName is not in the data frame, return the unmutated data frame
+  if (oldName %in% names(df) == FALSE) {
+    return(df)
+  }
+  
+  #change name and return mutated data frame
+  names(df)[names(df) == oldName] <- newName
+  return(df)
+}
+
+#read data
 cd <- read.csv("AllExp.csv")
 
+#change column names
+cd <- changeColName(cd, "Food", "Diet")
 
-#Change Date to custome date of R programm, no need now, format is already fine
+#change date to standard format
 cd$Date <- as.Date(cd$Date, "%m/%d/%y")
 
-#for calculating days after starting the exp
+##Calculate days after start
+#initiialize days variable
+cd$Days <- NA
+
+#for each sex
 for (sex in unique(cd$Gender)){
 
+  #for each experiment
   for (Days in unique(cd$Experiment)) {
   
+    #for each microbiome
     for (Days2 in unique(cd$Microbiome)) {
     
+    #find the lowest date for the given sex/experiment/microbiome combination
     lowdate <- min(cd$Date[cd$Experiment == Days & cd$Microbiome == Days2 & cd$Gender == sex])
   
+    #set days 
     cd$Days[cd$Experiment == Days & cd$Microbiome == Days2& cd$Gender == sex] <- cd$Date[cd$Experiment == Days & cd$Microbiome == Days2 & cd$Gender == sex] - lowdate
     }
   }
