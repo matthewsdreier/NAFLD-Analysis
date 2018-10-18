@@ -172,22 +172,30 @@ pPropWeightFemale <- ggplot(cdFemale, aes(x = cdFemale$Days, y = cdFemale$PropWe
   pPropWeightFemale
   
 ##Create function to remove outliers
-
+  #df: The data frame containing var
+  #var: The variable from which to remove outliers
+  #tol: The maximum change in weight as a proportion
 removeOutliers <- function(df, var, tol) {
   
+  #create new variable to hold model
   df$Trend <- NA
   
+  #for each mouse
   for (mouse in unique(df$UID)) {
     
+    #create linear model of variable by days
     model <- lm(df[,var][df$UID == mouse]~df$Days[df$UID == mouse])
     
+    #populate trend variable with model
     df$Trend[df$UID == mouse] <- model[[1]][2] * df$Days[df$UID == mouse] + model[[1]][1]
     
   }
   
+  #remove rows where var differs from model by more than tol
   df[,var][abs((df[,var] - df$Trend) / df$Trend) > tol] <- NA
   
-  
+  #remove trend variable and return df
+  df$Trend <- NULL
   return(df)
   
 }
