@@ -1,0 +1,122 @@
+---
+title: "NAFLD Analysis"
+author: "Benedikt Hild"
+date: "8/22/2018"
+output:
+  html_document: default
+  pdf_document: default
+---
+
+
+```{r setup, eval = TRUE, echo = FALSE, message = FALSE, warning = FALSE}
+
+setwd("~/Desktop/Research/NAFLD/Experiments/All Experiments togehter")
+
+library(ggplot2)
+
+library(gdata)
+
+library(rlist)
+library(gridExtra)
+library(gridBase)
+
+
+cd <- read.xls(("AllExp.xlsx"), sheet = "Experiments", header = TRUE)
+
+
+#Change Date to custome date of R programm, no need now, format is already fine
+cd$Date <- as.Date(cd$Date)
+
+
+#for calculating days after starting the exp
+for (Days in unique(cd$Experiment)) {
+  
+  for (Days2 in unique(cd$Microbiome)) {
+    
+    lowdate <- min(cd$Date[cd$Experiment == Days & cd$Microbiome == Days2])
+  
+    cd$Days[cd$Experiment == Days & cd$Microbiome == Days2] <- cd$Date[cd$Experiment == Days & cd$Microbiome == Days2] - lowdate
+  }
+  
+}
+
+minval <- min(cd$Weight, na.rm = TRUE)
+maxval <- max(cd$Weight, na.rm = TRUE)
+
+maxdays <- max(cd$Days, na.rm = TRUE)
+mindays <- min(cd$Days, na.rm = TRUE)
+gender <- "Female"
+
+  #Graph with all Exp together, take out the Gender loop, since we redo this for males separately
+#for (gender in unique(cd$Gender)){
+    
+    LChow <- subset(cd, cd$Microbiome == "Lab" & cd$Food == "Chow" & cd$Gender == gender)
+    LFat <- subset(cd, cd$Microbiome == "Lab" & cd$Food == "Fat"  & cd$Gender == gender)
+    WildChow <- subset(cd, cd$Microbiome == "Wild" & cd$Food == "Chow" & cd$Gender == gender)
+    WildFat <- subset(cd, cd$Microbiome == "Wild" & cd$Food == "Fat" & cd$Gender == gender)
+
+     plotallExp <- ggplot() +
+          geom_smooth(data = LChow, aes(x = LChow$Days, y = LChow$Weight, color = "Lab Chow")) +
+         ylim(c(1.15 * minval, 0.85 * maxval))+ xlim(c(mindays, maxdays)) + xlab("Days") + ylab("Weight (gr)") + scale_colour_manual("", values = c("darkturquoise","goldenrod1", "blue3", "darkolivegreen4"), breaks = c("Lab Chow", "Lab Fat", "Wild Chow", "Wild Fat")) +
+          geom_smooth(data = LFat, aes(x = LFat$Days, y = LFat$Weight, color = "Lab Fat")) +
+       geom_smooth(data = WildChow, aes(x = WildChow$Days, y = WildChow$Weight, color = "Wild Chow")) +
+       geom_smooth(data = WildFat, aes(x = WildFat$Days, y = WildFat$Weight, color = "Wild Fat")) +
+           ggtitle(paste("All Experiments", as.character(gender) )) + theme_bw()
+print(plotallExp)
+     
+#myplots <-list(plotallExp)
+
+
+#Graph with Exp extra
+
+for (Exp in unique(cd$Experiment)){
+  # take this out because we can just copy the same stuff for males later
+  #for (gender in unique(cd$Gender)){
+    
+    LChow <- subset(cd, cd$Microbiome == "Lab" & cd$Food == "Chow" & cd$Experiment == Exp & cd$Gender == gender)
+    LFat <- subset(cd, cd$Microbiome == "Lab" & cd$Food == "Fat" & cd$Experiment == Exp & cd$Gender == gender)
+    WildChow <- subset(cd, cd$Microbiome == "Wild" & cd$Food == "Chow" & cd$Experiment == Exp & cd$Gender == gender)
+    WildFat <- subset(cd, cd$Microbiome == "Wild" & cd$Food == "Fat" & cd$Experiment == Exp & cd$Gender == gender)
+
+     plotsepExp <- ggplot() +
+          geom_smooth(data = LChow, aes(x = LChow$Days, y = LChow$Weight, color = "Lab Chow")) +
+         ylim(c(1.15 * minval, 0.85 * maxval)) + xlim(c(mindays, maxdays)) + xlab("Days") + ylab("Weight (gr)") + scale_colour_manual("", values = c("darkturquoise","goldenrod1", "blue3", "darkolivegreen4"), breaks = c("Lab Chow", "Lab Fat", "Wild Chow", "Wild Fat")) +
+          geom_smooth(data = LFat, aes(x = LFat$Days, y = LFat$Weight, color = "Lab Fat")) +
+       geom_smooth(data = WildChow, aes(x = WildChow$Days, y = WildChow$Weight, color = "Wild Chow")) +
+       geom_smooth(data = WildFat, aes(x = WildFat$Days, y = WildFat$Weight, color = "Wild Fat")) +
+          ggtitle(paste("Experiment ", as.character(Exp), as.character(gender) )) + theme_bw()
+print(plotsepExp)
+#myplots <- list.append(myplots, list(plotsepExp))
+}
+
+
+
+```
+
+
+#c("blue","yellow", "red", "green")
+
+
+# for (Exp in unique(cd$Experiment)) {
+#   
+#   for (gender in unique(cd$Gender)) {
+#     
+#     for (microbiome in unique(cd$Microbiome)) {
+#       
+#       for (food in unique(cd$Food)) {
+#         
+#         temp <- subset(cd, cd$Experiment == Exp & cd$Gender == gender & cd$Microbiome == microbiome & cd$Food == food)
+#         
+#         plot <- ggplot(temp, aes(x = temp$Days, y = temp$Weight)) +
+#           geom_smooth() +
+#           ylim(c(1.15 * minval, 0.85 * maxval)) + 
+#           ggtitle(paste("Experiment ", as.character(Exp), as.character(gender), " Microbiome ", as.character(microbiome), " Diet ", as.character(food)))
+#         
+#         print(plot)       
+# 
+#       }
+#     }
+#   }
+# }
+
+

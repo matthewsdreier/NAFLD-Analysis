@@ -1,0 +1,173 @@
+---
+title: "Food Intake"
+author: "Benedikt Hild"
+date: "9/5/2018"
+output: html_document
+---
+
+```{r setup, eval = TRUE, echo = FALSE, message = FALSE, warning = FALSE}
+
+
+setwd("~/Desktop/Research/NAFLD/Experiments/All Experiments together")
+
+library(ggplot2)
+library(gdata)
+library(rlist)
+library(ggpubr)
+library(gridBase)
+library(gridExtra)
+#installation of ggpubr, according to websitehttp://www.sthda.com/english/articles/24-ggpubr-publication-ready-plots/81-ggplot2-easy-way-to-mix-multiple-graphs-on-the-same-page/
+
+cd <- read.csv("AllExpFood.csv")
+
+
+#Change Date to custome date of R programm, no need now, format is already fine
+cd$Date <- as.Date(cd$Date, "%m/%d/%y")
+
+#for calculating days after starting the exp
+for (Days in unique(cd$Experiment)) {
+  
+  for (Days2 in unique(cd$Microbiome)) {
+    
+    lowdate <- min(cd$Date[cd$Experiment == Days & cd$Microbiome == Days2])
+  
+    cd$Days[cd$Experiment == Days & cd$Microbiome == Days2] <- cd$Date[cd$Experiment == Days & cd$Microbiome == Days2] - lowdate
+  }
+  
+}
+#removes X values where food was wrongly added and thus the calculations are wrong
+cd$X <- as.double(as.character(cd$X))
+cd$X[cd$X < 5 | cd$X > 30] <- NA
+
+
+#remove rows where days equals NA
+cd <- subset(cd, is.na(cd$Days) == FALSE)
+
+#loop through gender
+for (gender in unique(cd$Gender)) {
+  
+  #loop through microbiome
+  for (microbiome in unique(cd$Microbiome)) {
+    
+    #loop through experiment
+    for (experiment in unique(cd$Experiment)) {
+    
+      #loop through measuring days
+      for (day in sort(unique(cd$Days[cd$Gender == gender & cd$Microbiome == microbiome]))) {
+        
+        #for not the most recent measurements
+        if (day != max(unique(cd$Days[cd$Gender == gender & cd$Microbiome == microbiome & cd$Experiment == experiment]))) {
+          
+          #find index of current day
+          indexDay <- match(day, sort(unique(cd$Days[cd$Gender == gender & cd$Microbiome == microbiome & cd$Experiment == experiment])))
+          
+          #find next day after current day
+          dayPlus1 <- sort(unique(cd$Days[cd$Gender == gender & cd$Microbiome == microbiome & cd$Experiment == experiment]))[indexDay + 1]
+          
+          #create new variable = x / number of days in between the current day and the next day
+          cd$foodPerDay[cd$Gender == gender & cd$Microbiome == microbiome & cd$Days == day & cd$Experiment == experiment] <- cd$X[cd$Gender == gender & cd$Microbiome == microbiome & cd$Days == day & cd$Experiment == experiment] / (dayPlus1 - day)
+       
+        }
+      }
+    }
+  }
+}
+
+#removes Food per day values wrongly calculated
+#cd$foodPerDay[cd$foodPerDay < 0.9] <- NA
+
+minval <- min(cd$foodPerDay, na.rm = TRUE)
+maxval <- max(cd$foodPerDay, na.rm = TRUE)
+maxdays <- max(cd$Days, na.rm = TRUE)
+mindays <- min(cd$Days, na.rm = TRUE)
+
+FemaleLabChow <- subset(cd, cd$Microbiome == "Lab" & cd$Diet == "Chow" & cd$Gender == "Female")
+FemaleLabFat <- subset(cd, cd$Microbiome == "Lab" & cd$Diet == "Fat" & cd$Gender == "Female")
+FemaleWildChow <- subset(cd, cd$Microbiome == "Wildling" & cd$Diet == "Chow" & cd$Gender == "Female")
+FemaleWildFat <- subset(cd, cd$Microbiome == "Wildling" & cd$Diet == "Fat" & cd$Gender == "Female")
+
+#plots for Fat Diet
+
+plotFemaleFood <- ggplot() +
+    geom_smooth(data = FemaleLabChow, aes(x = FemaleLabChow$Days, y = FemaleLabChow$foodPerDay)) +
+    geom_smooth(data = FemaleLabFat, aes(x = FemaleLabFat$Days, y = FemaleLabFat$foodPerDay)) +
+    geom_smooth(data = FemaleWildChow, aes(x = FemaleWildChow$Days, y = FemaleWildChow$foodPerDay)) +
+    geom_smooth(data = FemaleWildFat, aes(x = FemaleWildFat$Days, y = FemaleWildFat$foodPerDay))
+
+print(plotFemaleFood)
+
+
+plotFemaleFat <- ggplot() +
+  geom_smooth(data = FemaleLabFat,  aes(x = FemaleLabFat$Days, y = FemaleLabFat$foodPerDay, color = "Female Lab Fat")) +
+  geom_smooth(data = FemaleWildFat,  aes(x = FemaleWildFat$Days, y = FemaleWildFat$foodPerDay, color = "Female Wild Fat")) +
+  scale_colour_manual("", values = c("goldenrod1", "darkolivegreen4"), breaks = c("Female Lab Fat", "Female Wild Fat")) +
+   scale_x_continuous("Days",  breaks=seq(0,maxdays, 7), limits = c(mindays, maxdays)) +
+    scale_y_continuous("Daily food consumption per mouse [gr]", limit = c(1,3.5) )+
+  theme_set(theme_gray(base_size = 20))
+  
+print(plotFemaleFat)
+
+
+plotFemaleFatlm <- ggplot() +
+  geom_smooth(data = FemaleLabFat, method = "lm",  aes(x = FemaleLabFat$Days, y = FemaleLabFat$foodPerDay, color = "Female Lab Fat")) +
+  geom_smooth(data = FemaleWildFat, method = "lm", aes(x = FemaleWildFat$Days, y = FemaleWildFat$foodPerDay, color = "Female Wild Fat")) +
+  scale_colour_manual("", values = c("goldenrod1", "darkolivegreen4"), breaks = c("Female Lab Fat", "Female Wild Fat")) +
+  geom_jitter(data = FemaleLabFat, aes(x = FemaleLabFat$Days, y = FemaleLabFat$foodPerDay, color = "Female Lab Fat")) +
+  geom_jitter(data = FemaleWildFat, aes(x = FemaleWildFat$Days, y = FemaleWildFat$foodPerDay, color = "Female Wild Fat")) +
+  scale_colour_manual("", values = c("goldenrod1", "darkolivegreen4"), breaks = c("Female Lab Fat", "Female Wild Fat")) +
+   scale_x_continuous("Days",  breaks=seq(0,maxdays, 7), limits = c(mindays, maxdays)) +
+    scale_y_continuous("Food Consumption [gr]", limit = c(1,3.5) )+
+  theme_set(theme_classic2(base_size = 20) )+
+  theme(plot.title = element_text(hjust = 0.5)) +
+  ggtitle("Daily Food Consumption per Mouse")
+ 
+print(plotFemaleFatlm)
+
+plotFemaleFat2 <- ggplot() +
+  geom_jitter(data = FemaleLabFat, aes(x = FemaleLabFat$Days, y = FemaleLabFat$foodPerDay, color = "Female Lab Fat")) +
+  geom_jitter(data = FemaleWildFat, aes(x = FemaleWildFat$Days, y = FemaleWildFat$foodPerDay, color = "Female Wild Fat")) +
+  scale_colour_manual("", values = c("goldenrod1", "darkolivegreen4"), breaks = c("Female Lab Fat", "Female Wild Fat")) +
+  scale_colour_manual("", values = c("goldenrod1", "darkolivegreen4"), breaks = c("Female Lab Fat", "Female Wild Fat")) +
+    scale_x_continuous("Days",  breaks=seq(0,maxdays, 7), limits = c(mindays, maxdays)) +
+    scale_y_continuous("Daily food consumption per mouse [gr]", limit = c(1,3.5) ) +
+  theme_set(theme_gray(base_size = 20))
+ 
+print(plotFemaleFat2)
+
+#plots for Chow Diet
+
+plotFemaleChowlm <- ggplot() +
+  geom_smooth(data = FemaleLabChow, method = "lm",  aes(x = FemaleLabChow$Days, y = FemaleLabChow$foodPerDay, color = "Female Lab Chow")) +
+  geom_smooth(data = FemaleWildChow, method = "lm", aes(x = FemaleWildChow$Days, y = FemaleWildChow$foodPerDay, color = "Female Wild Chow")) +
+  scale_colour_manual("", values = c("darkturquoise", "blue3"), breaks = c("Female Lab Chow", "Female Wild Chow")) +
+  geom_jitter(data = FemaleLabChow, aes(x = FemaleLabChow$Days, y = FemaleLabChow$foodPerDay, color = "Female Lab Chow")) +
+  geom_jitter(data = FemaleWildChow, aes(x = FemaleWildChow$Days, y = FemaleWildChow$foodPerDay, color = "Female Wild Chow")) +
+  scale_colour_manual("", values = c("darkturquoise", "blue3"), breaks = c("Female Lab Chow", "Female Wild Chow")) +
+   scale_x_continuous("Days",  breaks=seq(0,maxdays, 7), limits = c(mindays, maxdays)) +
+    scale_y_continuous("Daily food consumption per mouse [gr]", limit = c(1,3.5) )+
+  theme_set(theme_gray(base_size = 20))
+ 
+print(plotFemaleChowlm)
+
+
+# 
+# for (gut in unique(cd$Microbiome)){
+#   
+#   for (food in unique (cd$Diet)){
+#     
+#     for(sex in unique(cd$Gender)){
+#     
+#     temp <- subset(cd, gut == cd$Microbiome & food == cd$Diet)
+# plotallExp <- ggplot(data = temp, aes(x = temp$Days, y = temp$X, color = factor(temp$Experiment)))+
+#   geom_smooth() +
+#    ggtitle(paste(as.character(sex), " Microbiome ", as.character(gut), " Diet ", as.character(food))) +
+#   ylim(5,30)
+#     
+# 
+# print(plotallExp)
+#     }
+#  }
+# }
+# 
+
+```

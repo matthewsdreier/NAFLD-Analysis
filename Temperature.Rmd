@@ -1,0 +1,209 @@
+---
+title: "Temperature"
+author: "Benedikt Hild"
+date: "9/11/2018"
+output: html_document
+---
+
+```{r setup, eval = TRUE, echo = FALSE, message = FALSE, warning = FALSE}
+
+# setwd("~/Desktop/Research/NAFLD/Experiments/All Experiments together")
+
+library(ggplot2)
+library(gdata)
+library(rlist)
+library(ggpubr)
+library(gridBase)
+library(gridExtra)
+#installation of ggpubr, according to websitehttp://www.sthda.com/english/articles/24-ggpubr-publication-ready-plots/81-ggplot2-easy-way-to-mix-multiple-graphs-on-the-same-page/
+
+cd <- read.csv("AllExp.csv")
+
+
+#Change Date to custome date of R programm, no need now, format is already fine
+cd$Date <- as.Date(cd$Date, "%m/%d/%y")
+
+#for calculating days after starting the exp
+for (Days in unique(cd$Experiment)) {
+  
+  for (Days2 in unique(cd$Microbiome)) {
+    
+    lowdate <- min(cd$Date[cd$Experiment == Days & cd$Microbiome == Days2])
+  
+    cd$Days[cd$Experiment == Days & cd$Microbiome == Days2] <- cd$Date[cd$Experiment == Days & cd$Microbiome == Days2] - lowdate
+  }
+  
+}
+
+minval <- min(cd$Temperature, na.rm = TRUE)
+maxval <- max(cd$Temperature, na.rm = TRUE)
+maxdays <- max(cd$Days, na.rm = TRUE)
+mindays <- min(cd$Days, na.rm = TRUE)
+sex <- "Female"
+
+#Graph with all Exp together, take out the sex loop, since we redo this for males separately
+#for (sex in unique(cd$Gender)){
+    
+LChow <- subset(cd, cd$Microbiome == "Lab" & cd$Food == "Chow" & cd$Gender == sex)
+#puts all Temp for day zero into subset LChowday0
+LChowDay0 <- subset(LChow, cd$Days == 0)
+#puts all Temp for all days except day 0 into subset
+LChowDayRest <- subset(LChow, cd$Days != 0)
+
+LFat <- subset(cd, cd$Microbiome == "Lab" & cd$Food == "Fat"  & cd$Gender == sex)
+LFatDay0 <- subset(LFat, cd$Days == 0)
+LFatDayRest <- subset(LFat, cd$Days != 0)
+
+WildChow <- subset(cd, cd$Microbiome == "Wild" & cd$Food == "Chow" & cd$Gender == sex)
+WChowDay0 <- subset(WildChow, cd$Days == 0)
+WChowDayRest <- subset(WildChow, cd$Days != 0)
+
+WildFat <- subset(cd, cd$Microbiome == "Wild" & cd$Food == "Fat" & cd$Gender == sex)
+WildFatDay0 <- subset(WildFat, cd$Days == 0)
+WildFatDayRest <- subset(WildFat, cd$Days != 0)
+
+ plotAllExp <- ggplot() +
+   geom_smooth(data = LChow, aes(x = LChow$Days, y = LChow$Temperature, color = "Lab Chow")) +
+   geom_smooth(data = LFat, aes(x = LFat$Days, y = LFat$Temperature, color = "Lab Fat")) +
+   geom_smooth(data = WildChow, aes(x = WildChow$Days, y = WildChow$Temperature, color = "Wild Chow")) +
+   geom_smooth(data = WildFat, aes(x = WildFat$Days, y = WildFat$Temperature, color = "Wild Fat")) +
+   ylim(c(34, 39)) +
+   scale_x_continuous(breaks=seq(0,maxdays, 7), limits = c(mindays, maxdays)) +
+  # xlim(c(mindays, maxdays)) +
+   xlab("Days") +
+   ylab("Temperature [°C]") +
+   scale_colour_manual("", values = c("darkturquoise","goldenrod1", "blue3", "darkolivegreen4"), breaks = c("Lab Chow", "Lab Fat", "Wild Chow", "Wild Fat")) +
+   ggtitle(paste("Temperature Females")) +
+   #puts Title of Graph into the middle of the graph
+   theme(plot.title = element_text(hjust = 0.5)) +
+   #adjusts size of writing and sets theme to "bw"
+    theme_set(theme_bw(base_size = 20) )
+ 
+ cdsub <- subset(cd, cd$Days == 0)
+ 
+ plotAllExpBoxplotDay0 <- ggplot(data = cdsub, aes(x = cd$Microbiome[cd$Days == 0], y = cd$Temperature[cd$Days == 0], color = cd$Food[cd$Days == 0])) +
+   geom_boxplot(ymin =34, ymax= 39)
+ 
+ 
+cdsuballDays <- subset(cd, cd$Days != 0)
+ 
+cd$Condition <- paste(cd$Microbiome, cd$Food)
+
+plotAllExpBoxplotAllDays <- ggplot(data = cdsuballDays, aes(x = cdsuballDays$Condition, y = cdsuballDays$Temperature, color = cdsuballDays$Condition)) +
+   geom_boxplot(lwd = 1.5) +  
+  ggtitle(paste("Temperature Females")) +
+   #adjusts size of writing and sets theme to "bw"
+    theme_set(theme_classic(base_size = 20) ) +
+   #puts Title of Graph into the middle of the graph
+   theme(plot.title = element_text(hjust = 0.5), axis.text.x = element_blank())   +
+   scale_colour_manual("", values = c("darkturquoise","goldenrod1", "blue3", "darkolivegreen4"), breaks = c("Lab Chow", "Lab Fat", "Wild Chow", "Wild Fat")) +
+   ggtitle(paste("Temperature Females")) +
+    xlab("Condition") +
+    # ylab(paste("Temperature [", ~degree~, "C]"))
+     ylab("Temperature [°C]")
+  
+
+ 
+
+LChow1 <- subset(cd, cd$Microbiome == "Lab" & cd$Food == "Chow" & cd$Gender == sex & cd$Experiment == 1)
+LFat1 <- subset(cd, cd$Microbiome == "Lab" & cd$Food == "Fat"  & cd$Gender == sex & cd$Experiment == 1)
+WildChow1 <- subset(cd, cd$Microbiome == "Wild" & cd$Food == "Chow" & cd$Gender == sex & cd$Experiment == 1)
+WildFat1 <- subset(cd, cd$Microbiome == "Wild" & cd$Food == "Fat" & cd$Gender == sex & cd$Experiment == 1)
+
+plotExp1 <- ggplot() +
+  geom_smooth(data = LChow1, aes(x = LChow1$Days, y = LChow1$Temperature, color = "Lab Chow")) +
+  geom_smooth(data = LFat1, aes(x = LFat1$Days, y = LFat1$Temperature, color = "Lab Fat")) +
+  geom_smooth(data = WildChow1, aes(x = WildChow1$Days, y = WildChow1$Temperature, color = "Wild Chow")) +
+  geom_smooth(data = WildFat1, aes(x = WildFat1$Days, y = WildFat1$Temperature, color = "Wild Fat")) +
+  ylim(c(1.15 * minval, 0.85 * maxval)) +
+  scale_x_continuous(breaks=seq(0,maxdays, 7), limits = c(mindays, maxdays)) +
+ # xlim(c(mindays, maxdays)) +
+  xlab("Days") +
+  ylab("Temperature (gr)") +
+  scale_colour_manual("", values = c("darkturquoise","goldenrod1", "blue3", "darkolivegreen4"), breaks = c("Lab Chow", "Lab Fat", "Wild Chow", "Wild Fat")) +
+  ggtitle( paste("Experiment 1", as.character(sex) )) +
+  theme_bw() +
+  theme(legend.position="none")
+
+print(plotExp1)
+
+
+LChow2 <- subset(cd, cd$Microbiome == "Lab" & cd$Food == "Chow" & cd$Gender == sex & cd$Experiment == 2)
+LFat2 <- subset(cd, cd$Microbiome == "Lab" & cd$Food == "Fat"  & cd$Gender == sex & cd$Experiment == 2)
+WildChow2 <- subset(cd, cd$Microbiome == "Wild" & cd$Food == "Chow" & cd$Gender == sex & cd$Experiment == 2)
+WildFat2 <- subset(cd, cd$Microbiome == "Wild" & cd$Food == "Fat" & cd$Gender == sex & cd$Experiment == 2)
+
+plotExp2 <- ggplot() +
+  geom_smooth(data = LChow2, aes(x = LChow2$Days, y = LChow2$Temperature, color = "Lab Chow")) +
+  geom_smooth(data = LFat2, aes(x = LFat2$Days, y = LFat2$Temperature, color = "Lab Fat")) +
+  geom_smooth(data = WildChow2, aes(x = WildChow2$Days, y = WildChow2$Temperature, color = "Wild Chow")) +
+  geom_smooth(data = WildFat2, aes(x = WildFat2$Days, y = WildFat2$Temperature, color = "Wild Fat")) +
+  ylim(c(1.15 * minval, 0.85 * maxval)) +
+  scale_x_continuous(breaks=seq(0,maxdays, 7), limits = c(mindays, maxdays)) +
+ # xlim(c(mindays, maxdays)) +
+  xlab("Days") +
+  ylab("Temperature (gr)") +
+  scale_colour_manual("", values = c("darkturquoise","goldenrod1", "blue3", "darkolivegreen4") ,
+                      breaks = c("Lab Chow", "Lab Fat", "Wild Chow", "Wild Fat")
+                      ) +
+  ggtitle( paste("Experiment 2", as.character(sex) )) +
+  theme_bw() +
+   theme(legend.position="none") 
+
+
+#Hardcoded Exp 3
+LChow3 <- subset(cd, cd$Microbiome == "Lab" & cd$Food == "Chow" & cd$Gender == sex & cd$Experiment == 3)
+LFat3 <- subset(cd, cd$Microbiome == "Lab" & cd$Food == "Fat"  & cd$Gender == sex & cd$Experiment == 3)
+WildChow3 <- subset(cd, cd$Microbiome == "Wild" & cd$Food == "Chow" & cd$Gender == sex & cd$Experiment == 3)
+WildFat3 <- subset(cd, cd$Microbiome == "Wild" & cd$Food == "Fat" & cd$Gender == sex & cd$Experiment == 3)
+
+
+plotExp3 <- ggplot() +
+  geom_smooth(data = LChow3, aes(x = LChow3$Days, y = LChow3$Temperature, color = "Lab Chow")) +
+  geom_smooth(data = LFat3, aes(x = LFat3$Days, y = LFat3$Temperature, color = "Lab Fat")) +
+  geom_smooth(data = WildChow3, aes(x = WildChow3$Days, y = WildChow3$Temperature, color = "Wild Chow")) +
+  geom_smooth(data = WildFat3, aes(x = WildFat3$Days, y = WildFat3$Temperature, color = "Wild Fat")) +
+  ylim(c(1.15 * minval, 0.85 * maxval)) +
+  scale_x_continuous(breaks=seq(0,maxdays, 7), limits = c(mindays, maxdays)) +
+ # xlim(c(mindays, maxdays)) +
+  xlab("Days") +
+  ylab("Temperature (C)") +
+  scale_colour_manual("", values = c("darkturquoise","goldenrod1", "blue3", "darkolivegreen4") ,
+                      breaks = c("Lab Chow", "Lab Fat", "Wild Chow", "Wild Fat")) +
+  ggtitle( paste("Experiment 3", as.character(sex) )) +
+  theme(plot.title = element_text(hjust = 0.5)) +
+  theme_set(theme_bw(base_size = 20) )
+
+print(plotExp3)
+
+grid.arrange(grobs = list(plotAllExp,
+         plotExp1, plotExp2, plotExp3),
+          layout_matrix = rbind(1, c(2:4)))
+
+
+
+ plotAllExpJitter <- ggplot() +
+   geom_smooth(data = LChow, method ="lm", aes(x = LChow$Days, y = LChow$Temperature, color = "Lab Chow")) +
+   geom_smooth(data = LFat, method ="lm", aes(x = LFat$Days, y = LFat$Temperature, color = "Lab Fat")) + 
+   geom_smooth(data = WildChow, method ="lm", aes(x = WildChow$Days, y = WildChow$Temperature, color = "Wild Chow")) +
+   geom_smooth(data = WildFat, method ="lm", aes(x = WildFat$Days, y = WildFat$Temperature, color = "Wild Fat")) +
+   geom_jitter(data = LChow, aes(x = LChow$Days, y = LChow$Temperature, color = "Lab Chow")) +
+   geom_jitter(data = LFat, aes(x = LFat$Days, y = LFat$Temperature, color = "Lab Fat")) +
+   geom_jitter(data = WildChow, aes(x = WildChow$Days, y = WildChow$Temperature, color = "Wild Chow")) +
+   geom_jitter(data = WildFat, aes(x = WildFat$Days, y = WildFat$Temperature, color = "Wild Fat")) +
+   ylim(c(34, 39)) +
+   scale_x_continuous(breaks=seq(0,maxdays, 7), limits = c(mindays, maxdays)) +
+  # xlim(c(mindays, maxdays)) +
+   xlab("Days") +
+   ylab("Temperature [°C]") +
+   scale_colour_manual("", values = c("darkturquoise","goldenrod1", "blue3", "darkolivegreen4"), breaks = c("Lab Chow", "Lab Fat", "Wild Chow", "Wild Fat")) +
+   ggtitle(paste("Temperature Females")) +
+   #puts Title of Graph into the middle of the graph
+   theme(plot.title = element_text(hjust = 0.5)) +
+   #adjusts size of writing and sets theme to "bw"
+    theme_set(theme_bw(base_size = 20) )
+ 
+ 
+    
+```
+```
