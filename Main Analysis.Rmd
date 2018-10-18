@@ -104,73 +104,6 @@ for (mouse in unique(cd$Temp)) {
 cd$Temp <- NULL
 
 
-
-
-```
-
-
-##Analysis of Weight
-
-```{r weight, eval = TRUE, include = TRUE, message = FALSE, warning = FALSE}
-
-##Find proportional weight 
-#intialize proportional weight variable
-cd$PropWeight <- NA
-
-#for each mouse
-for (mouse in unique(cd$UID)) {
- 
-  #find minimum day (start day) and minimum weight (on start day)
-  minDay <- min(cd$Day[cd$UID == mouse])
-  minWeight <- cd$Weight[cd$UID == mouse & cd$Day == minDay]
- 
-  #find proportional weight for the current mouse
-  cd$PropWeight[cd$UID == mouse] <- cd$Weight[cd$UID == mouse] / minWeight
-}
-
-#convert proportional weight to a percentage
-cd$PropWeight <- cd$PropWeight * 100
-
-#colors for graphing
-cd$Color <- paste(cd$Microbiome, cd$Diet)
-cols <- c("darkturquoise","goldenrod1", "blue3", "darkolivegreen4")
-
-##Plot weight
-#subset data for females and define boundaries
-cdFemale <- subset(cd, cd$Sex == "Female")
-maxDaysFemale <- max(cdFemale$Days)
-minWeightFemale <- min(cdFemale$Weight)
-maxWeightFemale <- max(cdFemale$Weight)
-
-#create graph
-pWeightFemale <- ggplot(cdFemale, aes(x = cdFemale$Days, y = cdFemale$Weight, color = cdFemale$Color)) +
-  geom_smooth() +
-  labs(x = "Day", y = "Weight (g)", title = "Absolute Weight of Female Mice") +
-  xlim(limits = c(0, maxDaysFemale)) +
-  ylim(limits = c(minWeightFemale, maxWeightFemale)) +
-  scale_colour_manual("", values = cols, breaks = c("Lab Chow", "Lab Fat", "Wild Chow", "Wild Fat")) +
-  theme_set(theme_bw(base_size = 20)) +
-  theme(plot.title = element_text(hjust = 0.5))
-
-  pWeightFemale
-
-##Plot proportional weight
-#define boundaries
-minPropWeightFemale <- min(cdFemale$PropWeight)
-maxPropWeightFemale <- max(cdFemale$PropWeight)
-
-#create graph
-pPropWeightFemale <- ggplot(cdFemale, aes(x = cdFemale$Days, y = cdFemale$PropWeight, color = cdFemale$Color)) +
-  geom_smooth() +
-  labs(x = "Day", y = "Proportional Weight (%)", title = "Proportional Weight of Female Mice") +
-  xlim(limits = c(0, maxDaysFemale)) +
-  ylim(limits = c(minPropWeightFemale, maxPropWeightFemale)) +
-  scale_colour_manual("", values = cols, breaks = c("Lab Chow", "Lab Fat", "Wild Chow", "Wild Fat")) +
-  theme_set(theme_bw(base_size = 20)) +
-  theme(plot.title = element_text(hjust = 0.5))
-  
-  pPropWeightFemale
-  
 ##Create function to remove outliers
   #df: The data frame containing var
   #var: The variable from which to remove outliers
@@ -200,6 +133,71 @@ removeOutliers <- function(df, var, tol) {
   
 }
 
+```
+
+
+##Analysis of Weight
+
+```{r weight, eval = TRUE, include = TRUE, message = FALSE, warning = FALSE}
+
+##Find proportional weight 
+  #intialize proportional weight variable
+cd$PropWeight <- NA
+
+#for each mouse
+for (mouse in unique(cd$UID)) {
+ 
+  #find minimum day (start day) and minimum weight (on start day)
+  minDay <- min(cd$Day[cd$UID == mouse])
+  minWeight <- cd$Weight[cd$UID == mouse & cd$Day == minDay]
+ 
+  #find proportional weight for the current mouse
+  cd$PropWeight[cd$UID == mouse] <- cd$Weight[cd$UID == mouse] / minWeight
+}
+
+#convert proportional weight to a percentage
+cd$PropWeight <- cd$PropWeight * 100
+
+#colors for graphing
+cd$Color <- paste(cd$Microbiome, cd$Diet)
+cols <- c("darkturquoise","goldenrod1", "blue3", "darkolivegreen4")
+
+##Plot weight
+  #subset data for females and define boundaries
+cdFemale <- subset(cd, cd$Sex == "Female")
+maxDaysFemale <- max(cdFemale$Days)
+minWeightFemale <- min(cdFemale$Weight)
+maxWeightFemale <- max(cdFemale$Weight)
+
+#create graph
+pWeightFemale <- ggplot(cdFemale, aes(x = cdFemale$Days, y = cdFemale$Weight, color = cdFemale$Color)) +
+  geom_smooth() +
+  labs(x = "Day", y = "Weight (g)", title = "Absolute Weight of Female Mice") +
+  xlim(limits = c(0, maxDaysFemale)) +
+  ylim(limits = c(minWeightFemale, maxWeightFemale)) +
+  scale_colour_manual("", values = cols, breaks = c("Lab Chow", "Lab Fat", "Wild Chow", "Wild Fat")) +
+  theme_set(theme_bw(base_size = 20)) +
+  theme(plot.title = element_text(hjust = 0.5))
+
+  pWeightFemale
+
+##Plot proportional weight
+  #define boundaries
+minPropWeightFemale <- min(cdFemale$PropWeight)
+maxPropWeightFemale <- max(cdFemale$PropWeight)
+
+#create graph
+pPropWeightFemale <- ggplot(cdFemale, aes(x = cdFemale$Days, y = cdFemale$PropWeight, color = cdFemale$Color)) +
+  geom_smooth() +
+  labs(x = "Day", y = "Proportional Weight (%)", title = "Proportional Weight of Female Mice") +
+  xlim(limits = c(0, maxDaysFemale)) +
+  ylim(limits = c(minPropWeightFemale, maxPropWeightFemale)) +
+  scale_colour_manual("", values = cols, breaks = c("Lab Chow", "Lab Fat", "Wild Chow", "Wild Fat")) +
+  theme_set(theme_bw(base_size = 20)) +
+  theme(plot.title = element_text(hjust = 0.5))
+  
+  pPropWeightFemale
+  
 ```
 
 
