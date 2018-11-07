@@ -1,0 +1,15 @@
+---
+title: "Notes on how to analyze"
+author: "Benedikt Hild"
+date: "11/7/2018"
+output: html_document
+---
+
+
+Weight binning
+
+Correlate cage temperature with cage weight
+
+Correlation between temp and weight per mouse
+
+
