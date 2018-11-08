@@ -133,6 +133,9 @@ removeOutliers <- function(df, var, tol) {
   
 }
 
+##Create new variable for condition (combination of microbiome and food)
+cd$Condition <- paste(cd$Microbiome, cd$Diet)
+
 ```
 
 
@@ -142,7 +145,7 @@ removeOutliers <- function(df, var, tol) {
 
 ##Find proportional weight 
   #intialize proportional weight variable
-cd$PropWeight <- NA
+cd$PercWeight <- NA
 
 #for each mouse
 for (mouse in unique(cd$UID)) {
@@ -152,11 +155,11 @@ for (mouse in unique(cd$UID)) {
   minWeight <- cd$Weight[cd$UID == mouse & cd$Day == minDay]
  
   #find proportional weight for the current mouse
-  cd$PropWeight[cd$UID == mouse] <- cd$Weight[cd$UID == mouse] / minWeight
+  cd$PercWeight[cd$UID == mouse] <- cd$Weight[cd$UID == mouse] / minWeight
 }
 
 #convert proportional weight to a percentage
-cd$PropWeight <- cd$PropWeight * 100
+cd$PercWeight <- cd$PercWeight * 100
 
 #colors for graphing
 cd$Color <- paste(cd$Microbiome, cd$Diet)
@@ -183,21 +186,38 @@ pWeightFemale <- ggplot(cdFemale, aes(x = cdFemale$Days, y = cdFemale$Weight, co
 
 ##Plot proportional weight
   #define boundaries
-minPropWeightFemale <- min(cdFemale$PropWeight)
-maxPropWeightFemale <- max(cdFemale$PropWeight)
+minPercWeightFemale <- min(cdFemale$PercWeight)
+maxPercWeightFemale <- max(cdFemale$PercWeight)
 
 #create graph
-pPropWeightFemale <- ggplot(cdFemale, aes(x = cdFemale$Days, y = cdFemale$PropWeight, color = cdFemale$Color)) +
+pPercWeightFemale <- ggplot(cdFemale, aes(x = cdFemale$Days, y = cdFemale$PercWeight, color = cdFemale$Color)) +
   geom_smooth() +
   labs(x = "Day", y = "Proportional Weight (%)", title = "Proportional Weight of Female Mice") +
   xlim(limits = c(0, maxDaysFemale)) +
-  ylim(limits = c(minPropWeightFemale, maxPropWeightFemale)) +
+  ylim(limits = c(minPercWeightFemale, maxPercWeightFemale)) +
   scale_colour_manual("", values = cols, breaks = c("Lab Chow", "Lab Fat", "Wild Chow", "Wild Fat")) +
   theme_set(theme_bw(base_size = 20)) +
   theme(plot.title = element_text(hjust = 0.5))
   
-  pPropWeightFemale
+  pPercWeightFemale
   
+##Bin weights
+  #create new variable for weight gain and set it to high when percent weight exceeds 150
+  cd$WeightGain <- "low"
+  cd$WeightGain[cd$PercWeight > 150] <- "high"
+  
+  #for each mouse
+  for (mouse in unique(cd$UID)) {
+    
+    #if the mouse ever has "high" weight gain, weight gain variable to "high" in all rows
+    if ("high" %in% unique(cd$WeightGain[cd$UID == mouse])) {
+      cd$WeightGain[cd$UID == mouse] <- "high"
+    }
+  }
+
+##
+prop.table(table(cd$WeightGain[cd$Days == 0], cd$Condition[cd$Days == 0]), margin = 2)
+
 ```
 
 
@@ -273,18 +293,18 @@ plotPropTemperatureFemale <- ggplot(cdFemale, aes(x = cdFemale$Days, y = cdFemal
     theme(plot.title = element_text(hjust = 0.5)) +
       ggtitle("Temperature over Time")
 
-print(plotPropWeightFemale)
+print(plotPercWeightFemale)
   
 print(plotPropGlucoseFemale)  
 print(plotPropTemperatureFemale)  
 
 cd$WeightBin <- FALSE
 
-cd$WeightBin[cd$PropWeight > 1.25] <- TRUE
+cd$WeightBin[cd$PercWeight > 1.25] <- TRUE
 
 FatWildHigh <- subset(cd, cd$WeightBin == TRUE & cd$Microbiome == "Wild" & cd$Food == "Fat" & cd$Days == "31")
 
-cd$WeightBin[cd$PropWeight < 1.25] <- TRUE
+cd$WeightBin[cd$PercWeight < 1.25] <- TRUE
 
 FatWildLow <- subset(cd, cd$WeightBin == TRUE & cd$Microbiome == "Wild" & cd$Food == "Fat" & cd$Days == "31")
 
