@@ -215,8 +215,12 @@ pPercWeightFemale <- ggplot(cdFemale, aes(x = cdFemale$Days, y = cdFemale$PercWe
     }
   }
 
-##
+##Create table with weight gain category by condition
 prop.table(table(cd$WeightGain[cd$Days == 0], cd$Condition[cd$Days == 0]), margin = 2)
+
+barplot(prop.table(table(cd$WeightGain[cd$Days == 0], cd$Condition[cd$Days == 0]), margin = 2), col = c("black", "light gray"))
+
+legend("bottomright", inset = 0.02, legend = c("High", "Low"), fill = c("black", "light gray"))
 
 ```
 
