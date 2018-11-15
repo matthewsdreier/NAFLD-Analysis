@@ -107,7 +107,7 @@ cd$Temp <- NULL
 ##Create function to remove outliers
   #df: The data frame containing var
   #var: The variable from which to remove outliers
-  #tol: The maximum change in weight as a proportion
+  #tol: The maximum change in var as a proportion
 removeOutliers <- function(df, var, tol) {
   
   #create new variable to hold model
@@ -218,9 +218,38 @@ pPercWeightFemale <- ggplot(cdFemale, aes(x = cdFemale$Days, y = cdFemale$PercWe
 ##Create table with weight gain category by condition
 prop.table(table(cd$WeightGain[cd$Days == 0], cd$Condition[cd$Days == 0]), margin = 2)
 
-barplot(prop.table(table(cd$WeightGain[cd$Days == 0], cd$Condition[cd$Days == 0]), margin = 2), col = c("black", "light gray"))
+#plot weight gain bins
+barplot(prop.table(table(cd$WeightGain[cd$Days == 0], cd$Condition[cd$Days == 0]), margin = 2), col = c("black", "light gray"), main = "Weight Gain of Female Mice", ylab = "Proportion")
 
-legend("bottomright", inset = 0.02, legend = c("High", "Low"), fill = c("black", "light gray"))
+legend("bottomright", inset = 0.02, legend = c(">50% Gain", "<50% Gain"), fill = c("black", "light gray"))
+
+sub <- subset(cdFemale, cdFemale$Condition == "Wild Fat")
+
+pBinWeight <- ggplot(sub, aes(x = sub$Days, y = sub$PercWeight, color = sub$WeightGain)) +
+  geom_smooth() +
+  labs(x = "Day", y = "Proportional Weight (%)", title = "Wildling High Fat Mice") +
+  xlim(limits = c(0, maxDaysFemale)) +
+  ylim(limits = c(minPercWeightFemale, maxPercWeightFemale)) +
+  scale_colour_manual("", values = cols, breaks = c("high", "low"), labels = c(">50% Gain", "<50% Gain")) +
+  theme_set(theme_bw(base_size = 20)) +
+  theme(plot.title = element_text(hjust = 0.5))
+
+
+pBinTemp <- ggplot(sub, aes(x = sub$Days, y = sub$Temperature, color = sub$WeightGain)) +
+  geom_smooth() +
+  geom_point() + 
+  labs(x = "Day", y = "Temperature (°C)", title = "Wildling High Fat Mice") +
+  scale_colour_manual("", values = cols, breaks = c("high", "low"), labels = c(">50% Gain", "<50% Gain")) +
+  theme_set(theme_bw(base_size = 20)) +
+  theme(plot.title = element_text(hjust = 0.5))
+
+pBinGlucose <- ggplot(sub, aes(x = sub$Days, y = sub$Glucose, color = sub$WeightGain)) +
+  geom_smooth() +
+  labs(x = "Day", y = "Blood Glucose (mg/dL)", title = "Wildling High Fat Mice") +
+  xlim(limits = c(0, maxDaysFemale)) +
+  scale_colour_manual("", values = cols, breaks = c("high", "low"), labels = c(">50% Gain", "<50% Gain")) +
+  theme_set(theme_bw(base_size = 20)) +
+  theme(plot.title = element_text(hjust = 0.5))
 
 ```
 
@@ -365,6 +394,38 @@ for (sex in unique(cd$Gender)) {
     }
   }
 }
+
+harvestData <- read.csv("Harvest Data.csv")
+
+harvestData <- subset(harvestData, is.na(harvestData$Mouse.Weight..g.) == FALSE)
+
+harvestSub <- subset(harvestData, harvestData$Microbiome == "Wildling")
+
+pHarvest <- ggplot(harvestSub, aes(x = harvestSub$Mouse.Weight..g., y = harvestSub$Liver.Weight..g., color = harvestSub$Diet)) +
+  geom_point() +
+  geom_smooth(method = lm) +
+  labs(x = "Mouse Weight (g)", y = "Liver Weight (g)") +
+  scale_colour_manual("", values = cols, breaks = c("Fat", "Chow")) +
+  theme_set(theme_bw(base_size = 20)) +
+  theme(plot.title = element_text(hjust = 0.5))
+
+harvestSub2 <- subset(harvestData, harvestData$Microbiome == "Lab")
+
+pHarvest2 <- ggplot(harvestSub2, aes(x = harvestSub2$Mouse.Weight..g., y = harvestSub2$Liver.Weight..g., color = harvestSub2$Diet)) +
+  geom_point() +
+  geom_smooth(method = lm) +
+  labs(x = "Mouse Weight (g)", y = "Liver Weight (g)") +
+  scale_colour_manual("", values = cols, breaks = c("Fat", "Chow")) +
+  theme_set(theme_bw(base_size = 20)) +
+  theme(plot.title = element_text(hjust = 0.5))
+
+cor.test(harvestSub$Mouse.Weight..g.[harvestSub$Diet == "Chow"], harvestSub$Liver.Weight..g.[harvestSub$Diet == "Chow"])
+
+cor.test(harvestSub$Mouse.Weight..g.[harvestSub$Diet == "Fat"], harvestSub$Liver.Weight..g.[harvestSub$Diet == "Fat"])
+
+cor.test(harvestSub2$Mouse.Weight..g.[harvestSub2$Diet == "Chow"], harvestSub2$Liver.Weight..g.[harvestSub2$Diet == "Chow"])
+
+cor.test(harvestSub2$Mouse.Weight..g.[harvestSub2$Diet == "Fat"], harvestSub2$Liver.Weight..g.[harvestSub2$Diet == "Fat"])
 
 ```
 
