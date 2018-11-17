@@ -226,16 +226,6 @@ pBinWeight <- ggplot(cdFWF, aes(x = cdFWF$Days, y = cdFWF$PercWeight, color = cd
 
 pBinWeight
 
-#plot temperature by weight gain bin
-pBinTemp <- ggplot(cdFWF, aes(x = cdFWF$Days, y = cdFWF$Temperature, color = cdFWF$WeightGain)) +
-  geom_smooth() +
-  labs(x = "Day", y = "Temperature (°C)", title = "Wildling High Fat Mice") +
-  scale_colour_manual("", values = cols, breaks = c("high", "low"), labels = c(">50% Gain", "<50% Gain")) +
-  theme_set(theme_bw(base_size = 20)) +
-  theme(plot.title = element_text(hjust = 0.5))
-
-pBinTemp
-
 #plot glucose by weight bin
 pBinGlucose <- ggplot(cdFWF, aes(x = cdFWF$Days, y = cdFWF$Glucose, color = cdFWF$WeightGain)) +
   geom_smooth() +
@@ -249,7 +239,89 @@ pBinGlucose
 ```
 
 
-```{r, eval = FALSE, include = FALSE}
+```{r temperature, eval = FALSE, include = FALSE}
+
+##Plot temperature
+pTemp <- ggplot(cdFemale, aes(x = cdFemale$Days, y = cdFemale$Temperature, color = cdFemale$WeightGain)) +
+  geom_smooth() +
+  labs(x = "Day", y = "Temperature (°C)", title = "Female Mice") +
+  scale_colour_manual("", values = cols, breaks = c("Lab Chow", "Lab Fat", "Wild Chow", "Wild Fat")) +
+  theme_set(theme_bw(base_size = 20)) +
+  theme(plot.title = element_text(hjust = 0.5))
+
+pTemp
+
+##Find proportional temperature
+  #intialize proportional temperature variable
+# cd$PercTemp <- NA
+# 
+# #for each mouse
+# for (mouse in unique(cd$UID)) {
+#  
+#   #find list of measurement days for mouse
+#   mouseDays <- sort(unique(cd$Days[cd$UID == mouse]))
+#   
+#   #find minimum day (start day) and minimum weight (on start day)
+#   i = 1
+#   minDay <- mouseDays[i]
+#   while (is.na(cd$Temperature[cd$UID == mouse & cd$Days == mouseDays[i]])) {
+#     i = i + 1
+#   }
+#   minTemp <- cd$Temperature[cd$UID == mouse & cd$Days == mouseDays[i]]
+#  
+#   #find proportional weight for the current mouse
+#   cd$PercTemp[cd$UID == mouse] <- cd$Temperature[cd$UID == mouse] / minTemp
+# }
+# 
+# #convert proportional weight to a percentage
+# cd$PercWeight <- cd$PercWeight * 100
+
+
+##Plot temperature by weight gain bin
+pBinTemp <- ggplot(cdFWF, aes(x = cdFWF$Days, y = cdFWF$Temperature, color = cdFWF$WeightGain)) +
+  geom_smooth() +
+  labs(x = "Day", y = "Temperature (°C)", title = "Wildling High Fat Mice") +
+  scale_colour_manual("", values = cols, breaks = c("high", "low"), labels = c(">50% Gain", "<50% Gain")) +
+  theme_set(theme_bw(base_size = 20)) +
+  theme(plot.title = element_text(hjust = 0.5))
+
+pBinTemp
+
+harvestData <- read.csv("Harvest Data.csv")
+
+harvestData <- subset(harvestData, is.na(harvestData$Mouse.Weight..g.) == FALSE)
+
+harvestSub <- subset(harvestData, harvestData$Microbiome == "Wildling")
+
+pHarvest <- ggplot(harvestSub, aes(x = harvestSub$Mouse.Weight..g., y = harvestSub$Liver.Weight..g., color = harvestSub$Diet)) +
+  geom_point() +
+  geom_smooth(method = lm) +
+  labs(x = "Mouse Weight (g)", y = "Liver Weight (g)") +
+  scale_colour_manual("", values = cols, breaks = c("Fat", "Chow")) +
+  theme_set(theme_bw(base_size = 20)) +
+  theme(plot.title = element_text(hjust = 0.5))
+
+harvestSub2 <- subset(harvestData, harvestData$Microbiome == "Lab")
+
+pHarvest2 <- ggplot(harvestSub2, aes(x = harvestSub2$Mouse.Weight..g., y = harvestSub2$Liver.Weight..g., color = harvestSub2$Diet)) +
+  geom_point() +
+  geom_smooth(method = lm) +
+  labs(x = "Mouse Weight (g)", y = "Liver Weight (g)") +
+  scale_colour_manual("", values = cols, breaks = c("Fat", "Chow")) +
+  theme_set(theme_bw(base_size = 20)) +
+  theme(plot.title = element_text(hjust = 0.5))
+
+cor.test(harvestSub$Mouse.Weight..g.[harvestSub$Diet == "Chow"], harvestSub$Liver.Weight..g.[harvestSub$Diet == "Chow"])
+
+cor.test(harvestSub$Mouse.Weight..g.[harvestSub$Diet == "Fat"], harvestSub$Liver.Weight..g.[harvestSub$Diet == "Fat"])
+
+cor.test(harvestSub2$Mouse.Weight..g.[harvestSub2$Diet == "Chow"], harvestSub2$Liver.Weight..g.[harvestSub2$Diet == "Chow"])
+
+cor.test(harvestSub2$Mouse.Weight..g.[harvestSub2$Diet == "Fat"], harvestSub2$Liver.Weight..g.[harvestSub2$Diet == "Fat"])
+
+```
+
+```{r glucose, eval = FALSE, include = FALSE}
 #create a new variable for proportional glucose
 cd$PropGlucose <- NA
  
@@ -304,123 +376,6 @@ plotPropGlucoseFemale <- ggplot(cdFemale, aes(x = cdFemale$Days, y = cdFemale$Pr
 
   
 
-#Plot proportional TEMPERATURE gain of all mice
-
-cd$Color <- paste(cd$Microbiome, cd$Food)
-
-cdFemale <- subset(cd, cd$Gender == "Female")
-
-plotPropTemperatureFemale <- ggplot(cdFemale, aes(x = cdFemale$Days, y = cdFemale$PropTemp, color = cdFemale$Color)) +
-                                 geom_smooth() +
-  scale_x_continuous(breaks=seq(0,maxdays, 7), limits = c(mindays, maxdays)) +
- # xlim(c(mindays, maxdays)) +
-  xlab("Days") +
-  ylab("Temperature[C]") +
-  scale_colour_manual("", values = c("darkturquoise","goldenrod1", "blue3", "darkolivegreen4"), breaks = c("Lab Chow", "Lab Fat", "Wild Chow", "Wild Fat")) +
-  theme_set(theme_bw(base_size = 20) ) +
-    theme(plot.title = element_text(hjust = 0.5)) +
-      ggtitle("Temperature over Time")
-
-print(plotPercWeightFemale)
-  
-print(plotPropGlucoseFemale)  
-print(plotPropTemperatureFemale)  
-
-cd$WeightBin <- FALSE
-
-cd$WeightBin[cd$PercWeight > 1.25] <- TRUE
-
-FatWildHigh <- subset(cd, cd$WeightBin == TRUE & cd$Microbiome == "Wild" & cd$Food == "Fat" & cd$Days == "31")
-
-cd$WeightBin[cd$PercWeight < 1.25] <- TRUE
-
-FatWildLow <- subset(cd, cd$WeightBin == TRUE & cd$Microbiome == "Wild" & cd$Food == "Fat" & cd$Days == "31")
-
-for (microbiome in unique(cd$Microbiome)){
-  
-  for(food in unique(cd$Food)){
-    
-    temp <- subset(cd, cd$Weight[cd$Microbiome == "Wild" & cd$Food == "Fat"])
-    
-    HistoWeight <- ggplot(data = temp, aes(temp$Weight)) +
-      geom_histogram()
-
-print(HistoWeight)
-  }
-}
-
-HistoWeight <- ggplot(data = cd, aes(cd$Weight)) +
-  geom_histogram()
-
-print(HistoWeight)
-
-for (histo in unique(cd$Days)){
-  
-  day <- subset(cd, cd$Days > "30")
-  
-  histogrammweight <- ggplot(data = cd, aes(y = cd$Weight))+
-    geom_histogram()
-  
-  
-}
-
-
-print(histogrammweight)
-
-
-for (sex in unique(cd$Gender)) {
-  for (microbiome in unique(cd$Microbiome)) {
-    for (food in unique(cd$Food)) {
-      
-      sub <- subset(cd, cd$Gender == sex & cd$Microbiome == microbiome & cd$Food == food)
-      
-      model <- lm(sub$Weight~sub$Temperature)
-      
-      p <- ggplot(data = sub, aes(x = sub$Temperature, y = sub$Weight, color = sub$Days)) + geom_point() + geom_abline(aes(intercept = as.numeric(model[[1]][1]), slope = as.numeric(model[[1]][2]))) + labs(x = "Temperature", y = "Weight", title = paste(sex, microbiome, food), subtitle = paste("Pearson Correlation: ", as.numeric(cor.test(sub$Temperature, sub$Weight)[4]), ", p = ", as.numeric(cor.test(sub$Temperature, sub$Weight)[3])))
-      
-      print(p)
-      
-      p2 <- ggplot(data = sub, aes(x = sub$UID, y = sub$Weight, color = sub$Days)) + geom_point()
-      
-      print(unique(sub$UID))
-      
-      print(p2)
-      
-    }
-  }
-}
-
-harvestData <- read.csv("Harvest Data.csv")
-
-harvestData <- subset(harvestData, is.na(harvestData$Mouse.Weight..g.) == FALSE)
-
-harvestSub <- subset(harvestData, harvestData$Microbiome == "Wildling")
-
-pHarvest <- ggplot(harvestSub, aes(x = harvestSub$Mouse.Weight..g., y = harvestSub$Liver.Weight..g., color = harvestSub$Diet)) +
-  geom_point() +
-  geom_smooth(method = lm) +
-  labs(x = "Mouse Weight (g)", y = "Liver Weight (g)") +
-  scale_colour_manual("", values = cols, breaks = c("Fat", "Chow")) +
-  theme_set(theme_bw(base_size = 20)) +
-  theme(plot.title = element_text(hjust = 0.5))
-
-harvestSub2 <- subset(harvestData, harvestData$Microbiome == "Lab")
-
-pHarvest2 <- ggplot(harvestSub2, aes(x = harvestSub2$Mouse.Weight..g., y = harvestSub2$Liver.Weight..g., color = harvestSub2$Diet)) +
-  geom_point() +
-  geom_smooth(method = lm) +
-  labs(x = "Mouse Weight (g)", y = "Liver Weight (g)") +
-  scale_colour_manual("", values = cols, breaks = c("Fat", "Chow")) +
-  theme_set(theme_bw(base_size = 20)) +
-  theme(plot.title = element_text(hjust = 0.5))
-
-cor.test(harvestSub$Mouse.Weight..g.[harvestSub$Diet == "Chow"], harvestSub$Liver.Weight..g.[harvestSub$Diet == "Chow"])
-
-cor.test(harvestSub$Mouse.Weight..g.[harvestSub$Diet == "Fat"], harvestSub$Liver.Weight..g.[harvestSub$Diet == "Fat"])
-
-cor.test(harvestSub2$Mouse.Weight..g.[harvestSub2$Diet == "Chow"], harvestSub2$Liver.Weight..g.[harvestSub2$Diet == "Chow"])
-
-cor.test(harvestSub2$Mouse.Weight..g.[harvestSub2$Diet == "Fat"], harvestSub2$Liver.Weight..g.[harvestSub2$Diet == "Fat"])
-
 ```
+
 
