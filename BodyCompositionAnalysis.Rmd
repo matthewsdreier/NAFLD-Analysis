@@ -1,0 +1,75 @@
+---
+title: "MR Body Composition"
+author: "Benedikt Hild"
+date: "11/20/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+
+#setwd("~/Deskto p/Research/NAFLD/Experiments/All Experiments togehter")
+library(ggplot2)
+library(gdata)
+library(rlist)
+library(ggpubr)
+library(gridBase)
+library(gridExtra)
+#installation of ggpubr, according to websitehttp://www.sthda.com/english/articles/24-ggpubr-publication-ready-plots/81-ggplot2-easy-way-to-mix-multiple-graphs-on-the-same-page/
+
+cd <- read.csv("BodyCompositionMR.csv")
+
+
+#Change Date to custome date of R programm, no need now, format is already fine
+#cd$Date <- as.Date(cd$Date, "%m/%d/%y")
+
+LChow <- subset(cd, cd$Microbiome == "Lab" & cd$Diet == "Chow")
+LFat <- subset(cd, cd$Microbiome == "Lab" & cd$Diet == "High Fat")
+WildChow <- subset(cd, cd$Microbiome == "Wildling" & cd$Diet == "Chow")
+WildFat <- subset(cd, cd$Microbiome == "Wildling" & cd$Diet == "High Fat")
+
+plotAllFatMass <- ggplot() +
+  geom_smooth(method = lm, data = LChow, aes(x = LChow$Weight, y = LChow$Fat, color = "Lab Chow")) +
+  geom_smooth(method = lm, data = LFat, aes(x = LFat$Weight, y = LFat$Fat, color = "Lab Fat")) +
+  geom_smooth(method = lm, data = WildChow, aes(x = WildChow$Weight, y = WildChow$Fat, color = "Wild Chow")) +
+  geom_smooth(method = lm, data = WildFat, aes(x = WildFat$Weight, y = WildFat$Fat, color = "Wild Fat")) +
+    geom_jitter(data = LFat, aes(x = LFat$Weight, y = LFat$Fat, color = "Lab Fat"), size = 2) +
+    geom_jitter(data = WildFat, aes(x = WildFat$Weight, y = WildFat$Fat, color = "Wild Fat"), size = 2) +
+    geom_jitter(data = LChow, aes(x = LChow$Weight, y = LChow$Fat, color = "Lab Chow"), size = 2) +
+    geom_jitter(data = WildChow, aes(x = WildChow$Weight, y = WildChow$Fat, color = "Wild Chow"), size =2 ) +
+  xlab("Weight [gr]") +
+  ylab("Fat Mass [gr]") +
+scale_colour_manual("", values = c("darkturquoise","goldenrod1", "blue3", "darkolivegreen4")) +
+  theme_set(theme_bw(base_size = 20) ) +
+    theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom") +
+      ggtitle("Body Composition Fat Mass")
+
+print(plotAllFatMass)
+
+
+plotAllLeanMass <- ggplot() +
+  geom_smooth(method = lm, data = LChow, aes(x = LChow$Weight, y = LChow$Lean, color = "Lab Chow")) +
+  geom_smooth(method = lm, data = LFat, aes(x = LFat$Weight, y = LFat$Lean, color = "Lab Fat")) +
+  geom_smooth(method = lm, data = WildChow, aes(x = WildChow$Weight, y = WildChow$Lean, color = "Wild Chow")) +
+  geom_smooth(method = lm, data = WildFat, aes(x = WildFat$Weight, y = WildFat$Lean, color = "Wild Fat")) +
+    geom_jitter(data = LFat, aes(x = LFat$Weight, y = LFat$Lean, color = "Lab Fat"), size = 2) +
+    geom_jitter(data = WildFat, aes(x = WildFat$Weight, y = WildFat$Lean, color = "Wild Fat"), size = 2) +
+    geom_jitter(data = LChow, aes(x = LChow$Weight, y = LChow$Lean, color = "Lab Chow"), size = 2) +
+    geom_jitter(data = WildChow, aes(x = WildChow$Weight, y = WildChow$Lean, color = "Wild Chow"), size =2 ) +
+  xlab("Weight [gr]") +
+  ylab("Lean Mass [gr]") +
+scale_colour_manual("", values = c("darkturquoise","goldenrod1", "blue3", "darkolivegreen4"), breaks = c("Lab Chow", "Lab Fat", "Wild Chow", "Wild Fat")) +
+  theme_set(theme_bw(base_size = 20) ) +
+    theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom") +
+      ggtitle("Body Composition Lean Mass")
+
+print(plotAllLeanMass)
+
+grid.arrange(plotAllFatMass, plotAllLeanMass, ncol = 1)
+
+
+
+
+
+```

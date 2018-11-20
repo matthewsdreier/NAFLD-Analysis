@@ -272,7 +272,7 @@ for (sex in unique(cd$Gender)) {
   
   print(plotBounceBack)
   
-  temp2 <- subset(cd, cd$UID == "122131" | cd$UID == "122132" | cd$UID == "122133" | cd$UID == "122124"  | cd$UID == "122135" | cd$UID == "121131" | cd$UID == "121132" | cd$UID == "121133" | cd$UID == "121124"  | cd$UID == "121135" )
+  temp2 <- subset(cd, cd$UID == "122131" | cd$UID == "122132" | cd$UID == "122133" | cd$UID == "122124"  | cd$UID == "122135" | cd$UID == "121131" | cd$UID == "121132" | cd$UID == "121133" | cd$UID == "121124"  | cd$UID == "121135" |cd$UID == "132131" | cd$UID == "132132" | cd$UID == "132133" | cd$UID == "132124"  | cd$UID == "132135" | cd$UID == "131131" | cd$UID == "131132" | cd$UID == "131133" | cd$UID == "131124"  | cd$UID == "131135" )
   
   plotLPSE2 <- ggplot(data = temp2, aes(x = temp2$Days, y = temp2$Weight, color = temp2$Microbiome)) +
   geom_smooth(span = 0.3) +
@@ -282,7 +282,7 @@ for (sex in unique(cd$Gender)) {
   ylab("Weight [gr]") +
   theme_set(theme_bw(base_size = 20) ) +
     theme(plot.title = element_text(hjust = 0.6)) +
-      ggtitle("Weight, BounceBack")
+      ggtitle("Weight, LPS")
 
     
   

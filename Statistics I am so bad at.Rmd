@@ -1,0 +1,139 @@
+---
+title: "Statistics for Weight gain"
+author: "Benedikt Hild"
+date: "11/20/2018"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+
+library(ggplot2)
+library(gdata)
+library(rlist)
+library(ggpubr)
+library(gridBase)
+library(gridExtra)
+#installation of ggpubr, according to websitehttp://www.sthda.com/english/articles/24-ggpubr-publication-ready-plots/81-ggplot2-easy-way-to-mix-multiple-graphs-on-the-same-page/
+
+cd <- read.csv("AllExp.csv")
+
+
+#Change Date to custome date of R programm, no need now, format is already fine
+cd$Date <- as.Date(cd$Date, "%m/%d/%y")
+
+#for calculating days after starting the exp
+for (sex in unique(cd$Gender)){
+
+  for (Days in unique(cd$Experiment)) {
+  
+    for (Days2 in unique(cd$Microbiome)) {
+    
+    lowdate <- min(cd$Date[cd$Experiment == Days & cd$Microbiome == Days2 & cd$Gender == sex])
+  
+    cd$Days[cd$Experiment == Days & cd$Microbiome == Days2& cd$Gender == sex] <- cd$Date[cd$Experiment == Days & cd$Microbiome == Days2 & cd$Gender == sex] - lowdate
+    }
+  }
+}
+
+minval <- min(cd$Weight[cd$Gender == "Female"], na.rm = TRUE)
+maxval <- max(cd$Weight[cd$Gender == "Female"], na.rm = TRUE)
+
+minvalmales <- min(cd$Weight[cd$Gender == "Male"], na.rm = TRUE)
+maxvalmales <- max(cd$Weight[cd$Gender == "Male"], na.rm = TRUE)
+
+maxdays <- max(cd$Days[cd$Gender == "Female"], na.rm = TRUE)
+maxdaysmales <- max(cd$Days[cd$Gender == "Male"], na.rm = TRUE)
+mindays <- min(cd$Days, na.rm = TRUE)
+sex <- "Female"
+sex2 <- "Male"
+
+#Graph with all Exp together, take out the sex loop, since we redo this for males separately
+#for (sex in unique(cd$Gender)){
+    
+LChow <- subset(cd, cd$Microbiome == "Lab" & cd$Food == "Chow" & cd$Gender == sex)
+LFat <- subset(cd, cd$Microbiome == "Lab" & cd$Food == "Fat"  & cd$Gender == sex)
+WildChow <- subset(cd, cd$Microbiome == "Wild" & cd$Food == "Chow" & cd$Gender == sex)
+WildFat <- subset(cd, cd$Microbiome == "Wild" & cd$Food == "Fat" & cd$Gender == sex)
+
+plotAllExp <- ggplot() +
+  geom_smooth(data = LChow, aes(x = LChow$Days, y = LChow$Weight, color = "Lab Chow")) +
+  geom_smooth(data = LFat, aes(x = LFat$Days, y = LFat$Weight, color = "Lab Fat")) +
+  geom_smooth(data = WildChow, aes(x = WildChow$Days, y = WildChow$Weight, color = "Wild Chow")) +
+  geom_smooth(data = WildFat, aes(x = WildFat$Days, y = WildFat$Weight, color = "Wild Fat")) +
+   geom_jitter(data = LFat, aes(x = LFat$Days, y = LFat$Weight, color = "Lab Fat"), size = 0.2) +
+  geom_jitter(data = WildFat, aes(x = WildFat$Days, y = WildFat$Weight, color = "Wild Fat"), size = 0.2) +
+  ylim(c(1.15 * minval, 0.85 * maxval)) +
+  scale_x_continuous(breaks=seq(0,maxdays, 7), limits = c(mindays, maxdays)) +
+ # xlim(c(mindays, maxdays)) +
+  xlab("Days") +
+  ylab("Weight [gr]") +
+  scale_colour_manual("", values = c("darkturquoise","goldenrod1", "blue3", "darkolivegreen4"), breaks = c("Lab Chow", "Lab Fat", "Wild Chow", "Wild Fat")) +
+  theme_set(theme_bw(base_size = 20) ) +
+    theme(plot.title = element_text(hjust = 0.5)) +
+      ggtitle("Weight over Time")
+
+
+plotAllFat <- ggplot() +
+  geom_smooth(data = LFat, aes(x = LFat$Days, y = LFat$Weight, color = "Lab Fat"), method =  lm) +
+  geom_smooth(data = WildFat, aes(x = WildFat$Days, y = WildFat$Weight, color = "Wild Fat"), method = lm) +
+   geom_jitter(data = LFat, aes(x = LFat$Days, y = LFat$Weight, color = "Lab Fat"), size = 0.4) +
+  geom_jitter(data = WildFat, aes(x = WildFat$Days, y = WildFat$Weight, color = "Wild Fat"), size = 0.4) +
+  ylim(c(1.15 * minval, 0.85 * maxval)) +
+  scale_x_continuous(breaks=seq(0,maxdays, 7), limits = c(mindays, maxdays)) +
+ # xlim(c(mindays, maxdays)) +
+  xlab("Days") +
+  ylab("Weight [gr]") +
+  scale_colour_manual("", values = c("goldenrod1", "darkolivegreen4" ), breaks = c("Lab Fat", "Wild Fat" )) +
+  theme_set(theme_bw(base_size = 20) ) +
+    theme(plot.title = element_text(hjust = 0.5)) +
+      ggtitle("Weight over Time")
+print(plotAllFat)
+
+LChow1 <- subset(cd, cd$Microbiome == "Lab" & cd$Food == "Chow" & cd$Gender == sex & cd$Experiment == 1)
+LFat1 <- subset(cd, cd$Microbiome == "Lab" & cd$Food == "Fat"  & cd$Gender == sex & cd$Experiment == 1)
+WildChow1 <- subset(cd, cd$Microbiome == "Wild" & cd$Food == "Chow" & cd$Gender == sex & cd$Experiment == 1)
+WildFat1 <- subset(cd, cd$Microbiome == "Wild" & cd$Food == "Fat" & cd$Gender == sex & cd$Experiment == 1)
+
+plotExp1 <- ggplot() +
+  geom_smooth(data = LChow1, aes(x = LChow1$Days, y = LChow1$Weight, color = "Lab Chow")) +
+  geom_smooth(data = LFat1, aes(x = LFat1$Days, y = LFat1$Weight, color = "Lab Fat")) +
+  geom_smooth(data = WildChow1, aes(x = WildChow1$Days, y = WildChow1$Weight, color = "Wild Chow")) +
+  geom_smooth(data = WildFat1, aes(x = WildFat1$Days, y = WildFat1$Weight, color = "Wild Fat")) +
+  ylim(c(1.15 * minval, 0.85 * maxval)) +
+  scale_x_continuous(breaks=seq(0,maxdays, 7), limits = c(mindays, maxdays)) +
+ # xlim(c(mindays, maxdays)) +
+  xlab("Days") +
+  ylab("Weight (gr)") +
+  scale_colour_manual("", values = c("darkturquoise","goldenrod1", "blue3", "darkolivegreen4"), breaks = c("Lab Chow", "Lab Fat", "Wild Chow", "Wild Fat")) +
+  ggtitle( paste("Experiment 1", as.character(sex) )) +
+  theme_bw() +
+  theme(legend.position="none")
+
+
+#loop through different days, and calculate the mean for every day
+for (Tag in unique(LFat$Days)  ) {
+  varLFat <- (LFat$Weight[LFat$Days == Tag])
+  MeanLabFat <- mean(varLFat , na.rm = TRUE)
+print(MeanLabFat)
+
+}
+
+for (Tag in unique(WildFat$Days)  ) {
+  varWildFat <- (WildFat$Weight[WildFat$Days == Tag])
+  MeanWildFat <- mean(varWildFat , na.rm = TRUE)
+print(MeanWildFat)
+
+}
+
+
+
+
+
+
+t.test(MeanLabFat~MeanWildFat, mu=0, alt="two.sided", conf=0.95, var.eq=F, paired=F)
+
+
+```
+
