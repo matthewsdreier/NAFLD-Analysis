@@ -1,0 +1,150 @@
+---
+title: "NAFLD multiple plitsperpage"
+author: "Benedikt Hild"
+date: "8/22/2018"
+output: html_document
+---
+
+``````{r setup, eval = TRUE, echo = FALSE, message = FALSE, warning = FALSE}
+
+#setwd("~/Desktop/Research/NAFLD/Experiments/All Experiments together")
+
+library(ggplot2)
+library(gdata)
+library(rlist)
+
+cd <- read.csv("AllExp.csv")
+
+
+#Change Date to custome date of R programm, no need now, format is already fine
+cd$Date <- as.Date(cd$Date, "%m/%d/%y")
+
+#for calculating days after starting the exp
+for (Days in unique(cd$Experiment)) {
+  
+  for (Days2 in unique(cd$Microbiome)) {
+    
+    lowdate <- min(cd$Date[cd$Experiment == Days & cd$Microbiome == Days2])
+  
+    cd$Days[cd$Experiment == Days & cd$Microbiome == Days2] <- cd$Date[cd$Experiment == Days & cd$Microbiome == Days2] - lowdate
+  }
+  
+}
+
+minval <- min(cd$Weight, na.rm = TRUE)
+maxval <- max(cd$Weight, na.rm = TRUE)
+maxdays <- max(cd$Days, na.rm = TRUE)
+mindays <- min(cd$Days, na.rm = TRUE)
+sex <- "Female"
+
+#Graph with all Exp together, take out the sex loop, since we redo this for males separately
+#for (sex in unique(cd$Gender)){
+    
+LChow <- subset(cd, cd$Microbiome == "Lab" & cd$Food == "Chow" & cd$Gender == sex)
+LFat <- subset(cd, cd$Microbiome == "Lab" & cd$Food == "Fat"  & cd$Gender == sex)
+WildChow <- subset(cd, cd$Microbiome == "Wild" & cd$Food == "Chow" & cd$Gender == sex)
+WildFat <- subset(cd, cd$Microbiome == "Wild" & cd$Food == "Fat" & cd$Gender == sex)
+
+plotAllExp <- ggplot() +
+  geom_smooth(data = LChow, aes(x = LChow$Days, y = LChow$Weight, color = "Lab Chow")) +
+  geom_smooth(data = LFat, aes(x = LFat$Days, y = LFat$Weight, color = "Lab Fat")) +
+  geom_smooth(data = WildChow, aes(x = WildChow$Days, y = WildChow$Weight, color = "Wild Chow")) +
+  geom_smooth(data = WildFat, aes(x = WildFat$Days, y = WildFat$Weight, color = "Wild Fat")) +
+  ylim(c(1.15 * minval, 0.85 * maxval)) +
+  xlim(c(mindays, maxdays)) +
+  xlab("Days") +
+  ylab("Weight (gr)") +
+  scale_colour_manual("", values = c("darkturquoise","goldenrod1", "blue3", "darkolivegreen4"), breaks = c("Lab Chow", "Lab Fat", "Wild Chow", "Wild Fat")) +
+  ggtitle(paste("All Experiments", as.character(sex))) +
+  theme_bw()
+
+
+LChow1 <- subset(cd, cd$Microbiome == "Lab" & cd$Food == "Chow" & cd$Gender == sex & cd$Experiment == 1)
+LFat1 <- subset(cd, cd$Microbiome == "Lab" & cd$Food == "Fat"  & cd$Gender == sex & cd$Experiment == 1)
+WildChow1 <- subset(cd, cd$Microbiome == "Wild" & cd$Food == "Chow" & cd$Gender == sex & cd$Experiment == 1)
+WildFat1 <- subset(cd, cd$Microbiome == "Wild" & cd$Food == "Fat" & cd$Gender == sex & cd$Experiment == 1)
+
+plotExp1 <- ggplot() +
+  geom_smooth(data = LChow1, aes(x = LChow1$Days, y = LChow1$Weight, color = "Lab Chow")) +
+  geom_smooth(data = LFat1, aes(x = LFat1$Days, y = LFat1$Weight, color = "Lab Fat")) +
+  geom_smooth(data = WildChow1, aes(x = WildChow1$Days, y = WildChow1$Weight, color = "Wild Chow")) +
+  geom_smooth(data = WildFat1, aes(x = WildFat1$Days, y = WildFat1$Weight, color = "Wild Fat")) +
+  ylim(c(1.15 * minval, 0.85 * maxval)) +
+  xlim(c(mindays, maxdays)) +
+  xlab("Days") +
+  ylab("Weight (gr)") +
+  scale_colour_manual("", values = c("darkturquoise","goldenrod1", "blue3", "darkolivegreen4"), breaks = c("Lab Chow", "Lab Fat", "Wild Chow", "Wild Fat")) +
+  ggtitle( paste("Experiment 1", as.character(sex) )) +
+  theme_bw()
+
+LChow2 <- subset(cd, cd$Microbiome == "Lab" & cd$Food == "Chow" & cd$Gender == sex & cd$Experiment == 2)
+LFat2 <- subset(cd, cd$Microbiome == "Lab" & cd$Food == "Fat"  & cd$Gender == sex & cd$Experiment == 2)
+WildChow2 <- subset(cd, cd$Microbiome == "Wild" & cd$Food == "Chow" & cd$Gender == sex & cd$Experiment == 2)
+WildFat2 <- subset(cd, cd$Microbiome == "Wild" & cd$Food == "Fat" & cd$Gender == sex & cd$Experiment == 2)
+
+plotExp2 <- ggplot() +
+  geom_smooth(data = LChow2, aes(x = LChow2$Days, y = LChow2$Weight, color = "Lab Chow")) +
+  geom_smooth(data = LFat2, aes(x = LFat2$Days, y = LFat2$Weight, color = "Lab Fat")) +
+  geom_smooth(data = WildChow2, aes(x = WildChow2$Days, y = WildChow2$Weight, color = "Wild Chow")) +
+  geom_smooth(data = WildFat2, aes(x = WildFat2$Days, y = WildFat2$Weight, color = "Wild Fat")) +
+  ylim(c(1.15 * minval, 0.85 * maxval)) +
+  xlim(c(mindays, maxdays)) +
+  xlab("Days") +
+  ylab("Weight (gr)") +
+  scale_colour_manual("", values = c("darkturquoise","goldenrod1", "blue3", "darkolivegreen4"), breaks = c("Lab Chow", "Lab Fat", "Wild Chow", "Wild Fat")) +
+  ggtitle( paste("Experiment 2", as.character(sex) )) +
+  theme_bw()
+
+
+# 
+# # Multiple plot function
+# #
+# # ggplot objects can be passed in ..., or to plotlist (as a list of ggplot objects)
+# # - cols:   Number of columns in layout
+# # - layout: A matrix specifying the layout. If present, 'cols' is ignored.
+# #
+# # If the layout is something like matrix(c(1,2,3,3), nrow=2, byrow=TRUE),
+# # then plot 1 will go in the upper left, 2 will go in the upper right, and
+# # 3 will go all the way across the bottom.
+# #
+multiplot <- function(..., plotlist=NULL, file, cols=2, layout=NULL) {
+  library(grid)
+
+  # Make a list from the ... arguments and plotlist
+  plots <- c(list(...), plotlist)
+
+  numPlots = length(plots)
+
+  # If layout is NULL, then use 'cols' to determine layout
+  if (is.null(layout)) {
+    # Make the panel
+    # ncol: Number of columns of plots
+    # nrow: Number of rows needed, calculated from # of cols
+    layout <- matrix(seq(1, cols * ceiling(numPlots/cols)),
+                    ncol = cols, nrow = ceiling(numPlots/cols))
+  }
+
+ if (numPlots==1) {
+    print(plots[[1]])
+
+  } else {
+    # Set up the page
+    grid.newpage()
+    pushViewport(viewport(layout = grid.layout(nrow(layout), ncol(layout))))
+
+    # Make each plot, in the correct location
+    for (i in 1:numPlots) {
+      # Get the i,j matrix positions of the regions that contain this subplot
+      matchidx <- as.data.frame(which(layout == i, arr.ind = TRUE))
+
+      print(plots[[i]], vp = viewport(layout.pos.row = matchidx$row,
+                                      layout.pos.col = matchidx$col))
+    }
+  }
+}
+
+
+#grid.arrange(plotallExp, plotsepExp, ncol = 2)
+
+#multiplot(plotlist = myplots)
+```
