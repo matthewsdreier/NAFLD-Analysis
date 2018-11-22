@@ -15,6 +15,7 @@ library(rlist)
 library(ggpubr)
 library(gridBase)
 library(gridExtra)
+library(dplyr)
 #installation of ggpubr, according to websitehttp://www.sthda.com/english/articles/24-ggpubr-publication-ready-plots/81-ggplot2-easy-way-to-mix-multiple-graphs-on-the-same-page/
 
 cd <- read.csv("AllExp.csv")
@@ -36,6 +37,9 @@ for (sex in unique(cd$Gender)){
     }
   }
 }
+
+
+cd$Week <- round(cd$Days/7)
 
 minval <- min(cd$Weight[cd$Gender == "Female"], na.rm = TRUE)
 maxval <- max(cd$Weight[cd$Gender == "Female"], na.rm = TRUE)
@@ -111,28 +115,17 @@ plotExp1 <- ggplot() +
   theme_bw() +
   theme(legend.position="none")
 
+AllFat <- subset(cd, cd$Food == "Fat"  & cd$Gender == sex)
 
 #loop through different days, and calculate the mean for every day
-for (Tag in unique(LFat$Days)  ) {
-  varLFat <- (LFat$Weight[LFat$Days == Tag])
-  MeanLabFat <- mean(varLFat , na.rm = TRUE)
-print(MeanLabFat)
-
-}
-
-for (Tag in unique(WildFat$Days)  ) {
-  varWildFat <- (WildFat$Weight[WildFat$Days == Tag])
-  MeanWildFat <- mean(varWildFat , na.rm = TRUE)
-print(MeanWildFat)
-
+for (Woche in unique(AllFat$Week)  ) {
+ x<- t.test(cd$Weight[cd$Microbiome == "Lab" & cd$Week == Woche], cd$Weight[cd$Microbiome == "Wild" & cd$Week == Woche])
+print(x)
 }
 
 
 
 
-
-
-t.test(MeanLabFat~MeanWildFat, mu=0, alt="two.sided", conf=0.95, var.eq=F, paired=F)
 
 
 ```
