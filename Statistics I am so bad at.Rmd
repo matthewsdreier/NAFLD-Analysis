@@ -61,6 +61,36 @@ LFat <- subset(cd, cd$Microbiome == "Lab" & cd$Food == "Fat"  & cd$Gender == sex
 WildChow <- subset(cd, cd$Microbiome == "Wild" & cd$Food == "Chow" & cd$Gender == sex)
 WildFat <- subset(cd, cd$Microbiome == "Wild" & cd$Food == "Fat" & cd$Gender == sex)
 
+
+
+AllFat <- subset(cd, cd$Food == "Fat"  & cd$Gender == sex)
+AllChow <- subset(cd, cd$Food == "Chow"  & cd$Gender == sex)
+AllLab <- subset(cd, cd$Microbiome == "Lab"  & cd$Gender == sex)
+AllWild <- subset(cd, cd$Microbiome == "Wild"  & cd$Gender == sex)
+
+
+#loop through different days, and calculate the mean for every day, this one compares both Fat conditions
+for (Woche in unique(AllFat$Week)  ) {
+ x<- t.test(AllFat$Weight[AllFat$Microbiome == "Lab" & AllFat$Week == Woche], AllFat$Weight[AllFat$Microbiome == "Wild" & AllFat$Week == Woche])
+print(x)
+}
+
+
+for (Woche in unique(AllWild$Week)  ) {
+ y<- t.test(AllWild$Weight[AllWild$Food == "Fat" & AllWild$Week == Woche], AllWild$Weight[AllWild$Food == "Chow" & AllWild$Week == Woche])
+print(y)
+}
+
+
+
+
+
+
+
+
+
+
+
 plotAllExp <- ggplot() +
   geom_smooth(data = LChow, aes(x = LChow$Days, y = LChow$Weight, color = "Lab Chow")) +
   geom_smooth(data = LFat, aes(x = LFat$Days, y = LFat$Weight, color = "Lab Fat")) +
@@ -114,17 +144,6 @@ plotExp1 <- ggplot() +
   ggtitle( paste("Experiment 1", as.character(sex) )) +
   theme_bw() +
   theme(legend.position="none")
-
-AllFat <- subset(cd, cd$Food == "Fat"  & cd$Gender == sex)
-
-#loop through different days, and calculate the mean for every day
-for (Woche in unique(AllFat$Week)  ) {
- x<- t.test(cd$Weight[cd$Microbiome == "Lab" & cd$Week == Woche], cd$Weight[cd$Microbiome == "Wild" & cd$Week == Woche])
-print(x)
-}
-
-
-
 
 
 
