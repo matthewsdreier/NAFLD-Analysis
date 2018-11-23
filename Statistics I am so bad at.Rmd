@@ -76,14 +76,30 @@ print(x)
 }
 
 
-for (Woche in unique(AllWild$Week)  ) {
- y<- t.test(AllWild$Weight[AllWild$Food == "Fat" & AllWild$Week == Woche], AllWild$Weight[AllWild$Food == "Chow" & AllWild$Week == Woche])
-print(y)
+#compares Wild and Lab with HF
+for (Woche in unique(cd$Week)  ) {
+ x<- t.test(cd$Weight[cd$Microbiome == "Lab" & cd$Week == Woche & cd$Food == "Fat"], cd$Weight[cd$Microbiome == "Wild" & cd$Week == Woche & cd$Food == "Fat"])
+print(x)
+}
+
+#compares Wild chow vs Fat
+for (Woche in unique(cd$Week)  ) {
+ w<- t.test(cd$Weight[cd$Microbiome == "Wild" & cd$Week == Woche & cd$Food == "Fat"], cd$Weight[cd$Microbiome == "Wild" & cd$Week == Woche & cd$Food == "Chow"])
+print(w)
+}
+
+#compares Wild HF vs Lab Chow
+for (Woche in unique(cd$Week)  ) {
+ w<- t.test(cd$Weight[cd$Microbiome == "Wild" & cd$Week == Woche & cd$Food == "Fat"], cd$Weight[cd$Microbiome == "Lab" & cd$Week == Woche & cd$Food == "Chow"])
+print(w)
 }
 
 
-
-
+#compares Chow Wild vs Lab 
+for (Woche in unique(cd$Week)  ) {
+ w<- t.test(cd$Weight[cd$Microbiome == "Wild" & cd$Week == Woche & cd$Food == "Chow"], cd$Weight[cd$Microbiome == "Lab" & cd$Week == Woche & cd$Food == "Chow"])
+print(w)
+}
 
 
 
