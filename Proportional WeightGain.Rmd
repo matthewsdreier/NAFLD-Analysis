@@ -7,7 +7,7 @@ output: html_document
 
 ```{r setup, eval = TRUE, echo = FALSE, message = FALSE, warning = FALSE}
 
-setwd("~/Deskto p/Research/NAFLD/Experiments/All Experiments togehter")
+#setwd("~/Deskto p/Research/NAFLD/Experiments/All Experiments togehter")
 library(ggplot2)
 library(gdata)
 library(rlist)
@@ -35,15 +35,24 @@ for (sex in unique(cd$Gender)){
     }
   }
 }
+cd$Week <- round(cd$Days/7)
+
 
 minval <- min(cd$Weight[cd$Gender == "Female"], na.rm = TRUE)
 maxval <- max(cd$Weight[cd$Gender == "Female"], na.rm = TRUE)
+
+minprop <- min(cd$PropWeight[cd$Gender == "Female"], na.rm = TRUE)
+maxprop <- max(cd$PropWeight[cd$Gender == "Female"], na.rm = TRUE)
 
 minvalmales <- min(cd$Weight[cd$Gender == "Male"], na.rm = TRUE)
 maxvalmales <- max(cd$Weight[cd$Gender == "Male"], na.rm = TRUE)
 
 maxdays <- max(cd$Days[cd$Gender == "Female"], na.rm = TRUE)
+maxweeks <- max(cd$Week[cd$Gender == "Female"], na.rm = TRUE)
+minweeks <- min(cd$Week[cd$Gender == "Female"], na.rm = TRUE)
 maxdaysmales <- max(cd$Days[cd$Gender == "Male"], na.rm = TRUE)
+
+
 mindays <- min(cd$Days, na.rm = TRUE)
 sex <- "Female"
 sex2 <- "Male"
@@ -95,6 +104,20 @@ for (mouse in unique(cd$UID)) {
   cd$PropWeight[cd$UID == mouse] <- cd$Weight[cd$UID == mouse] / minWeight
  
 }
+
+AllFat <- subset(cd, cd$Food == "Fat"  & cd$Gender == sex)
+
+#loop through different days, and calculate the mean for every day
+for (Woche in unique(AllFat$Week)  ) {
+ x<- t.test(cd$PropWeight[cd$Microbiome == "Lab" & cd$Week == Woche+1], cd$PropWeight[cd$Microbiome == "Wild" & cd$Week == Woche+1])
+print(x)
+}
+
+
+
+
+
+
 #create a new variable for proportional glucose
 cd$PropGlucose <- NA
  
@@ -258,35 +281,94 @@ for (sex in unique(cd$Gender)) {
   
   temp <- subset(cd, cd$UID == "122122" | cd$UID == "122113" | cd$UID == "122114" | cd$UID == "122115"  | cd$UID == "121122" | cd$UID == "121113" | cd$UID == "121114" | cd$UID == "121115" | cd$UID == "132122" | cd$UID == "132113" | cd$UID == "132114" | cd$UID == "132115"  | cd$UID == "131122" | cd$UID == "131113" | cd$UID == "131114" | cd$UID == "131115")
   
-  plotBounceBack <- ggplot(data = temp, aes(x = temp$Days, y = temp$Weight, color = temp$Microbiome)) +
+  plotBounceBack <- ggplot(data = temp, aes(x = temp$Days, y = temp$PropWeight, color = temp$Microbiome)) +
   geom_smooth(span = 0.6) +
-    scale_x_continuous(breaks=seq(0,maxdays, 7), limits = c(mindays, maxdays)) +
- # xlim(c(mindays, maxdays)) +
+   scale_x_continuous(breaks=seq(0,maxdays, 7), limits = c(mindays, maxdays)) +
+ ylim(c(minprop, 0.9*maxprop)) +
   xlab("Days") +
   ylab("Weight [gr]") +
+  scale_colour_manual("", values = c("goldenrod1","darkolivegreen4"), breaks = c("Lab Fat", "Wild Fat")) +
   theme_set(theme_bw(base_size = 20) ) +
-    theme(plot.title = element_text(hjust = 0.6)) +
+    theme(plot.title = element_text(hjust = 0.6), legend.position = "bottom", panel.border = element_rect(color = "blue3", fill = NA, size = 3)) +
       ggtitle("Weight, BounceBack")
-
-    
   
   print(plotBounceBack)
   
+  meantemplab <- mean(temp$PropWeight[temp$Microbiome == "Lab" & temp$Week == "10"]) 
+  meantempwild <- mean(temp$PropWeight[temp$Microbiome == "Wild" & temp$Week == "10"]) 
+  meantemplab18 <- mean(temp$PropWeight[temp$Microbiome == "Lab" & temp$Week == "18"]) 
+  meantempwild18 <- mean(temp$PropWeight[temp$Microbiome == "Wild" & temp$Week == "18"]) 
+  
+  
   temp2 <- subset(cd, cd$UID == "122131" | cd$UID == "122132" | cd$UID == "122133" | cd$UID == "122124"  | cd$UID == "122135" | cd$UID == "121131" | cd$UID == "121132" | cd$UID == "121133" | cd$UID == "121124"  | cd$UID == "121135" |cd$UID == "132131" | cd$UID == "132132" | cd$UID == "132133" | cd$UID == "132124"  | cd$UID == "132135" | cd$UID == "131131" | cd$UID == "131132" | cd$UID == "131133" | cd$UID == "131124"  | cd$UID == "131135" )
   
-  plotLPSE2 <- ggplot(data = temp2, aes(x = temp2$Days, y = temp2$Weight, color = temp2$Microbiome)) +
-  geom_smooth(span = 0.3) +
+  plotLPSE2 <- ggplot(data = temp2, aes(x = temp2$Days, y = temp2$PropWeight, color = temp2$Microbiome)) +
+  geom_smooth(span = 0.6) +
     scale_x_continuous(breaks=seq(0,maxdays, 7), limits = c(mindays, maxdays)) +
- # xlim(c(mindays, maxdays)) +
+  ylim(c(minprop, 0.9*maxprop)) +
   xlab("Days") +
-  ylab("Weight [gr]") +
+  ylab("Weight [gr]") +  
+  scale_colour_manual("", values = c("goldenrod1","darkolivegreen4"), breaks = c("Lab Fat", "Wild Fat")) +
   theme_set(theme_bw(base_size = 20) ) +
-    theme(plot.title = element_text(hjust = 0.6)) +
+    theme(plot.title = element_text(hjust = 0.6), legend.position = "bottom", panel.border = element_rect(color = "black", fill = NA, size = 3)) +
       ggtitle("Weight, LPS")
-
-    
+  
+ meantemp2lab <- mean(temp2$PropWeight[temp2$Microbiome == "Lab" & temp2$Week == "10"]) 
+ meantemp2wild <- mean(temp2$PropWeight[temp2$Microbiome == "Wild" & temp2$Week == "10"]) 
+meantemp2lab18 <- mean(temp2$PropWeight[temp2$Microbiome == "Lab" & temp2$Week == "18"]) 
+ meantemp2wild18 <- mean(temp2$PropWeight[temp2$Microbiome == "Wild" & temp2$Week == "18"]) 
+     
   
   print(plotLPSE2)
+  
+  temp3 <- subset(cd, cd$UID == "122141" | cd$UID == "122142" | cd$UID == "122143" | cd$UID == "122144"  | cd$UID == "122125" | cd$UID == "121141" | cd$UID == "121142" | cd$UID == "121143" | cd$UID == "121144"  | cd$UID == "121125" |cd$UID == "132141" | cd$UID == "132142" | cd$UID == "132143" | cd$UID == "132144"  | cd$UID == "132125" | cd$UID == "131141" | cd$UID == "131142" | cd$UID == "131143" | cd$UID == "131144"  | cd$UID == "131125" )
+  
+  meantemp3lab <- mean(temp3$PropWeight[temp3$Microbiome == "Lab" & temp3$Week == "10"]) 
+  meantemp3wild <- mean(temp3$PropWeight[temp3$Microbiome == "Wild" & temp3$Week == "10"]) 
+   meantemp3lab18 <- mean(temp3$PropWeight[temp3$Microbiome == "Lab" & temp3$Week == "18"]) 
+  meantemp3wild18 <- mean(temp3$PropWeight[temp3$Microbiome == "Wild" & temp3$Week == "18"]) 
+     
+  plotHFC <- ggplot(data = temp3, aes(x = temp2$Days, y = temp3$PropWeight, color = temp3$Microbiome)) +
+  geom_smooth(span = 0.6) +
+    scale_x_continuous(breaks=seq(0,maxdays, 7), limits = c(mindays, maxdays)) +
+ ylim(c(minprop,0.9*maxprop)) +
+  xlab("Days") +
+  ylab("Weight [gr]") +  
+  scale_colour_manual("", values = c("goldenrod1","darkolivegreen4"), breaks = c("Lab Fat", "Wild Fat")) +
+  theme_set(theme_bw(base_size = 20) ) +
+    theme(plot.title = element_text(hjust = 0.6), legend.position = "bottom", panel.border = element_rect(color = "goldenrod1", fill = NA, size = 3)) +
+      ggtitle("Weight, High Fat cont.")
+print(plotHFC)
 
+
+  grid.arrange(plotBounceBack, plotLPSE2, plotHFC, ncol=1)
+  
+  sigHFCvsBB <-t.test(temp3$PropWeight[temp3$Microbiome == "Wild" & temp3$Week == 10], temp$PropWeight[temp$Microbiome == "Wild" & temp$Week == 10])
+   
+  sigHFCvsLPS <-t.test(temp3$PropWeight[temp3$Microbiome == "Wild" & temp3$Week == 10], temp2$PropWeight[temp2$Microbiome == "Wild" & temp2$Week == 10])
+  
+  sigHFCvsBBLab <-t.test(temp3$PropWeight[temp3$Microbiome == "Lab" & temp3$Week == 10], temp$PropWeight[temp$Microbiome == "Lab" & temp$Week == 10])
+   
+  sigHFCvsLPSLab <-t.test(temp3$PropWeight[temp3$Microbiome == "Lab" & temp3$Week == 10], temp2$PropWeight[temp2$Microbiome == "Lab" & temp2$Week == 10])
+   
+  
+  sigHFCvsBB18 <-t.test(temp3$PropWeight[temp3$Microbiome == "Wild" & temp3$Week == 18], temp$PropWeight[temp$Microbiome == "Wild" & temp$Week == 18])
+   
+  sigHFCvsLPS18 <-t.test(temp3$PropWeight[temp3$Microbiome == "Wild" & temp3$Week == 18], temp2$PropWeight[temp2$Microbiome == "Wild" & temp2$Week == 18])
+  
+  sigHFCvsBBLab18 <-t.test(temp3$PropWeight[temp3$Microbiome == "Lab" & temp3$Week == 18], temp$PropWeight[temp$Microbiome == "Lab" & temp$Week == 18])
+   
+  sigHFCvsLPSLab18 <-t.test(temp3$PropWeight[temp3$Microbiome == "Lab" & temp3$Week == 10], temp2$PropWeight[temp2$Microbiome == "Lab" & temp2$Week == 18])
+   
+  
+  print(sigHFCvsBB18)
+  print(sigHFCvsLPS18)
+  print(sigHFCvsBBLab18)
+  print(sigHFCvsLPSLab18)
+  
+  
+ 
+
+  
 
 ```
