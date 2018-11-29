@@ -108,9 +108,10 @@ for (mouse in unique(cd$UID)) {
 AllFat <- subset(cd, cd$Food == "Fat"  & cd$Gender == sex)
 
 #loop through different days, and calculate the mean for every day
-for (Woche in unique(AllFat$Week)  ) {
+for (Woche in sort(unique(AllFat$Week))) {
  x<- t.test(cd$PropWeight[cd$Microbiome == "Lab" & cd$Week == Woche+1], cd$PropWeight[cd$Microbiome == "Wild" & cd$Week == Woche+1])
-print(x)
+print(Woche)
+ print(x)
 }
 
 
@@ -278,7 +279,7 @@ for (sex in unique(cd$Gender)) {
 }
 
 
-  
+  #Subset all mice that are included in the BounceBack group (contains both Wild and Lab as well as HF and Chow)
   temp <- subset(cd, cd$UID == "122122" | cd$UID == "122113" | cd$UID == "122114" | cd$UID == "122115"  | cd$UID == "121122" | cd$UID == "121113" | cd$UID == "121114" | cd$UID == "121115" | cd$UID == "132122" | cd$UID == "132113" | cd$UID == "132114" | cd$UID == "132115"  | cd$UID == "131122" | cd$UID == "131113" | cd$UID == "131114" | cd$UID == "131115")
   
   plotBounceBack <- ggplot(data = temp, aes(x = temp$Days, y = temp$PropWeight, color = temp$Microbiome)) +
@@ -328,7 +329,7 @@ meantemp2lab18 <- mean(temp2$PropWeight[temp2$Microbiome == "Lab" & temp2$Week =
    meantemp3lab18 <- mean(temp3$PropWeight[temp3$Microbiome == "Lab" & temp3$Week == "18"]) 
   meantemp3wild18 <- mean(temp3$PropWeight[temp3$Microbiome == "Wild" & temp3$Week == "18"]) 
      
-  plotHFC <- ggplot(data = temp3, aes(x = temp2$Days, y = temp3$PropWeight, color = temp3$Microbiome)) +
+  plotHFC <- ggplot(data = temp3, aes(x = temp3$Days, y = temp3$PropWeight, color = temp3$Microbiome)) +
   geom_smooth(span = 0.6) +
     scale_x_continuous(breaks=seq(0,maxdays, 7), limits = c(mindays, maxdays)) +
  ylim(c(minprop,0.9*maxprop)) +
@@ -358,15 +359,16 @@ print(plotHFC)
   
   sigHFCvsBBLab18 <-t.test(temp3$PropWeight[temp3$Microbiome == "Lab" & temp3$Week == 18], temp$PropWeight[temp$Microbiome == "Lab" & temp$Week == 18])
    
-  sigHFCvsLPSLab18 <-t.test(temp3$PropWeight[temp3$Microbiome == "Lab" & temp3$Week == 10], temp2$PropWeight[temp2$Microbiome == "Lab" & temp2$Week == 18])
-   
+  sigHFCvsLPSLab18 <-t.test(temp3$PropWeight[temp3$Microbiome == "Lab" & temp3$Week == 18], temp2$PropWeight[temp2$Microbiome == "Lab" & temp2$Week == 18])
+
+    sigLPSvsLPS18 <-t.test(temp$PropWeight[temp$Microbiome == "Lab" & temp$Week == 18], temp$PropWeight[temp$Microbiome == "Wild" & temp$Week == 18])   
   
   print(sigHFCvsBB18)
   print(sigHFCvsLPS18)
   print(sigHFCvsBBLab18)
   print(sigHFCvsLPSLab18)
   
-  
+  print(sigLPSvsLPS18)
  
 
   
