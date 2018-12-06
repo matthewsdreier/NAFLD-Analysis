@@ -29,12 +29,18 @@ LFat <- subset(cd, cd$Microbiome == "Lab" & cd$Diet == "High Fat")
 WildChow <- subset(cd, cd$Microbiome == "Wildling" & cd$Diet == "Chow")
 WildFat <- subset(cd, cd$Microbiome == "Wildling" & cd$Diet == "High Fat")
 
+Lab <- subset(cd, cd$Microbiome == "Lab")
+Wildling <- subset(cd, cd$Microbiome == "Wildling")
+
+
+#from here on will be the Fat mass analysis
+
 plotAllFatMass <- ggplot() +
   geom_smooth(method = lm, data = LChow, aes(x = LChow$Weight, y = LChow$Fat, color = "Lab Chow")) +
   geom_smooth(method = lm, data = LFat, aes(x = LFat$Weight, y = LFat$Fat, color = "Lab Fat")) +
   geom_smooth(method = lm, data = WildChow, aes(x = WildChow$Weight, y = WildChow$Fat, color = "Wild Chow")) +
   geom_smooth(method = lm, data = WildFat, aes(x = WildFat$Weight, y = WildFat$Fat, color = "Wild Fat")) +
-    geom_jitter(data = LFat, aes(x = LFat$Weight, y = LFat$Fat, color = "Lab Fat"), size = 2) +
+      geom_jitter(data = LFat, aes(x = LFat$Weight, y = LFat$Fat, color = "Lab Fat"), size = 2) +
     geom_jitter(data = WildFat, aes(x = WildFat$Weight, y = WildFat$Fat, color = "Wild Fat"), size = 2) +
     geom_jitter(data = LChow, aes(x = LChow$Weight, y = LChow$Fat, color = "Lab Chow"), size = 2) +
     geom_jitter(data = WildChow, aes(x = WildChow$Weight, y = WildChow$Fat, color = "Wild Chow"), size =2 ) +
@@ -46,6 +52,41 @@ scale_colour_manual("", values = c("darkturquoise","goldenrod1", "blue3", "darko
       ggtitle("Body Composition Fat Mass")
 
 print(plotAllFatMass)
+
+#plots the same as above with additionally all conditions combinded and the lines of the seperate conditions made smaller
+plotAllFatMassWithComb <- ggplot() +
+  geom_smooth(method = lm, data = LChow, aes(x = LChow$Weight, y = LChow$Fat, color = "Lab Chow"), size = 0.5) +
+  geom_smooth(method = lm, data = LFat, aes(x = LFat$Weight, y = LFat$Fat, color = "Lab Fat"), size = 0.5) +
+  geom_smooth(method = lm, data = WildChow, aes(x = WildChow$Weight, y = WildChow$Fat, color = "Wild Chow"), size = 0.5) +
+  geom_smooth(method = lm, data = WildFat, aes(x = WildFat$Weight, y = WildFat$Fat, color = "Wild Fat"), size = 0.5) +
+  geom_smooth(method = lm, data = cd, aes(x = cd$Weight, y = cd$Fat, color = "All"), size = 1) +
+    geom_jitter(data = LFat, aes(x = LFat$Weight, y = LFat$Fat, color = "Lab Fat"), size = 1) +
+    geom_jitter(data = WildFat, aes(x = WildFat$Weight, y = WildFat$Fat, color = "Wild Fat"), size = 1) +
+    geom_jitter(data = LChow, aes(x = LChow$Weight, y = LChow$Fat, color = "Lab Chow"), size = 1) +
+    geom_jitter(data = WildChow, aes(x = WildChow$Weight, y = WildChow$Fat, color = "Wild Chow"), size = 1 ) +
+  xlab("Weight [gr]") +
+  ylab("Fat Mass [gr]") +
+scale_colour_manual("", values = c("red", "darkturquoise","goldenrod1", "blue3", "darkolivegreen4")) +
+  theme_set(theme_bw(base_size = 20) ) +
+    theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom") +
+      ggtitle("Body Composition Fat Mass")
+
+print(plotAllFatMassWithComb)
+
+plotFatMassLabvsWildling <- ggplot() +
+  geom_smooth(method = lm, data = Lab, aes(x = Lab$Weight, y = Lab$Fat, color = "Lab")) +
+ geom_smooth(method = lm, data = Wildling, aes(x = Wildling$Weight, y = Wildling$Fat, color = "Wild")) +
+   geom_jitter(data = Lab, aes(x = Lab$Weight, y = Lab$Fat, color = "Lab"), size = 2) +
+   geom_jitter(data = Wildling, aes(x = Wildling$Weight, y = Wildling$Fat, color = "Wild"), size = 2) +
+    xlab("Weight [gr]") +
+  ylab("Lean Mass [gr]") +
+scale_colour_manual("", values = c("goldenrod1" , "darkolivegreen4"), breaks = c("Lab", "Wild")) +
+  theme_set(theme_bw(base_size = 20) ) +
+    theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom") +
+      ggtitle("Body Composition Lean Mass")
+
+print(plotFatMassLabvsWildling)
+# From here on will be the lean Mass analysis
 
 
 plotAllLeanMass <- ggplot() +
@@ -66,10 +107,82 @@ scale_colour_manual("", values = c("darkturquoise","goldenrod1", "blue3", "darko
 
 print(plotAllLeanMass)
 
+plotAllLeanMassWithComb <- ggplot() +
+  geom_smooth(method = lm, data = LChow, aes(x = LChow$Weight, y = LChow$Lean, color = "Lab Chow"), size = 0.5) +
+  geom_smooth(method = lm, data = LFat, aes(x = LFat$Weight, y = LFat$Lean, color = "Lab Fat"), size = 0.5) +
+  geom_smooth(method = lm, data = WildChow, aes(x = WildChow$Weight, y = WildChow$Lean, color = "Wild Chow"), size = 0.5) +
+  geom_smooth(method = lm, data = WildFat, aes(x = WildFat$Weight, y = WildFat$Lean, color = "Wild Fat"), size = 0.5) +
+    geom_jitter(data = LFat, aes(x = LFat$Weight, y = LFat$Lean, color = "Lab Fat"), size = 1) +
+   geom_smooth(method = lm, data = cd, aes(x = cd$Weight, y = cd$Lean, color = "All"), size = 1) +
+    geom_jitter(data = WildFat, aes(x = WildFat$Weight, y = WildFat$Lean, color = "Wild Fat"), size = 1) +
+    geom_jitter(data = LChow, aes(x = LChow$Weight, y = LChow$Lean, color = "Lab Chow"), size = 1) +
+    geom_jitter(data = WildChow, aes(x = WildChow$Weight, y = WildChow$Lean, color = "Wild Chow"), size = 1 ) +
+  xlab("Weight [gr]") +
+  ylab("Lean Mass [gr]") +
+scale_colour_manual("", values = c("red", "darkturquoise","goldenrod1", "blue3", "darkolivegreen4"), breaks = c("All", "Lab Chow", "Lab Fat", "Wild Chow", "Wild Fat")) +
+  theme_set(theme_bw(base_size = 20) ) +
+    theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom") +
+      ggtitle("Body Composition Lean Mass")
+
+print(plotAllLeanMassWithComb)
+
+
+plotLeanMassLabvsWildling <- ggplot() +
+  geom_smooth(method = lm, data = Lab, aes(x = Lab$Weight, y = Lab$Lean, color = "Lab")) +
+ geom_smooth(method = lm, data = Wildling, aes(x = Wildling$Weight, y = Wildling$Lean, color = "Wild")) +
+   geom_jitter(data = Lab, aes(x = Lab$Weight, y = Lab$Lean, color = "Lab", shape = Lab$Diet), size = 2) +
+   geom_jitter(data = Wildling, aes(x = Wildling$Weight, y = Wildling$Lean, color = "Wild", shape = Lab$Diet), size = 2) +
+    scale_shape_discrete(" ", solid=F)+
+   xlab("Weight [gr]") +
+  ylab("Lean Mass [gr]") +
+scale_colour_manual("", values = c("goldenrod1" , "darkolivegreen4"), breaks = c("Lab", "Wild")) +
+  theme_set(theme_bw(base_size = 20) ) +
+    theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom") +
+      ggtitle("Body Composition Lean Mass")
+
+print(plotLeanMassLabvsWildling)
+
+plotLeanMassLabvsWildlingandAll <- ggplot() +
+  geom_smooth(method = lm, data = Lab, aes(x = Lab$Weight, y = Lab$Lean, color = "Lab"), size = 0.5, se = FALSE) +
+ geom_smooth(method = lm, data = Wildling, aes(x = Wildling$Weight, y = Wildling$Lean, color = "Wild"), size = 0.5, se = FALSE) +
+  geom_smooth(method = lm, data = cd, aes(x = cd$Weight, y = cd$Lean, color = "All"), size = 1, se = FALSE) +
+   geom_jitter(data = Lab, aes(x = Lab$Weight, y = Lab$Lean, color = "Lab"), size = 1) +
+   geom_jitter(data = Wildling, aes(x = Wildling$Weight, y = Wildling$Lean, color = "Wild"), size = 1) +
+    xlab("Weight [gr]") +
+  ylab("Lean Mass [gr]") +
+scale_colour_manual("", values = c("red" , "goldenrod1" ,  "darkolivegreen4"), breaks = c("Lab", "Wild", "All")) +
+  theme_set(theme_bw(base_size = 20) ) +
+    theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom") +
+      ggtitle("Body Composition Lean Mass")
+
+print(plotLeanMassLabvsWildlingandAll)
+
+
 grid.arrange(plotAllFatMass, plotAllLeanMass, ncol = 1)
 
+grid.arrange(plotAllFatMass, plotAllFatMassWithComb, ncol = 1)
+
+grid.arrange( plotAllFatMassWithComb,plotFatMassLabvsWildling, ncol = 1)
+
+
+grid.arrange(plotAllLeanMass, plotAllLeanMassWithComb, ncol = 1)
+
+grid.arrange(plotLeanMassLabvsWildling, plotLeanMassLabvsWildlingandAll, ncol = 1)
+
+
+#correlation for fat mass, first for all conditions combinded
+ cor.test(cd$Weight, cd$Fat, method = "pearson")
+#only for lab
+ cor.test(cd$Weight[cd$Microbiome == "Lab"], cd$Fat[cd$Microbiome == "Lab"], method = "pearson")
+#correlation for WIldling
+ cor.test(cd$Weight[cd$Microbiome == "Wildling"], cd$Fat[cd$Microbiome == "Wildling"], method = "pearson")
 
 
 
+#correlation for lean mas
+cor.test(cd$Weight, cd$Lean, method = "pearson")
 
+cor.test(cd$Weight[cd$Microbiome == "Lab"], cd$Lean[cd$Microbiome == "Lab"])
+
+cor.test(cd$Weight[cd$Microbiome == "Wildling"], cd$Lean[cd$Microbiome == "Wildling"])
 ```
