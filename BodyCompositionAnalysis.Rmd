@@ -126,7 +126,7 @@ scale_colour_manual("", values = c("red", "darkturquoise","goldenrod1", "blue3",
 
 print(plotAllLeanMassWithComb)
 
-
+#plots Wildling vs Lab
 plotLeanMassLabvsWildling <- ggplot() +
   geom_smooth(method = lm, data = Lab, aes(x = Lab$Weight, y = Lab$Lean, color = "Lab")) +
  geom_smooth(method = lm, data = Wildling, aes(x = Wildling$Weight, y = Wildling$Lean, color = "Wild")) +
@@ -141,6 +141,23 @@ scale_colour_manual("", values = c("goldenrod1" , "darkolivegreen4"), breaks = c
       ggtitle("Body Composition Lean Mass")
 
 print(plotLeanMassLabvsWildling)
+
+#plots WildlingHighFat vs Lab HighFat
+plotLeanMassLabHFvsWildlingHF <- ggplot() +
+  geom_smooth(method = lm, data = LFat, aes(x = LFat$Weight, y = LFat$Lean, color = "Lab")) +
+ geom_smooth(method = lm, data = WildFat, aes(x = WildFat$Weight, y = WildFat$Lean, color = "Wild")) +
+   geom_jitter(data = LFat, aes(x = LFat$Weight, y = LFat$Lean, color = "Lab", shape = LFat$Diet), size = 2) +
+   geom_jitter(data = WildFat, aes(x = WildFat$Weight, y = WildFat$Lean, color = "Wild", shape = LFat$Diet), size = 2) +
+    scale_shape_discrete(" ", solid=F)+
+   xlab("Weight [gr]") +
+  ylab("Lean Mass [gr]") +
+scale_colour_manual("", values = c("goldenrod1" , "darkolivegreen4"), breaks = c("Lab", "Wild")) +
+  theme_set(theme_bw(base_size = 20) ) +
+    theme(plot.title = element_text(hjust = 0.5), legend.position = "bottom") +
+      ggtitle("Body Composition Lean Mass")
+
+print(plotLeanMassLabHFvsWildlingHF)
+
 
 plotLeanMassLabvsWildlingandAll <- ggplot() +
   geom_smooth(method = lm, data = Lab, aes(x = Lab$Weight, y = Lab$Lean, color = "Lab"), size = 0.5, se = FALSE) +
@@ -157,7 +174,7 @@ scale_colour_manual("", values = c("red" , "goldenrod1" ,  "darkolivegreen4"), b
 
 print(plotLeanMassLabvsWildlingandAll)
 
-
+#gridarrange for Fat analysis
 grid.arrange(plotAllFatMass, plotAllLeanMass, ncol = 1)
 
 grid.arrange(plotAllFatMass, plotAllFatMassWithComb, ncol = 1)
@@ -165,10 +182,13 @@ grid.arrange(plotAllFatMass, plotAllFatMassWithComb, ncol = 1)
 grid.arrange( plotAllFatMassWithComb,plotFatMassLabvsWildling, ncol = 1)
 
 
+
+#Grid arrange for lean analysis
 grid.arrange(plotAllLeanMass, plotAllLeanMassWithComb, ncol = 1)
 
 grid.arrange(plotLeanMassLabvsWildling, plotLeanMassLabvsWildlingandAll, ncol = 1)
 
+grid.arrange(plotLeanMassLabvsWildling, plotLeanMassLabHFvsWildlingHF, ncol = 1)
 
 #correlation for fat mass, first for all conditions combinded
  cor.test(cd$Weight, cd$Fat, method = "pearson")
@@ -182,7 +202,16 @@ grid.arrange(plotLeanMassLabvsWildling, plotLeanMassLabvsWildlingandAll, ncol = 
 #correlation for lean mas
 cor.test(cd$Weight, cd$Lean, method = "pearson")
 
+#correlation of different microbiota
 cor.test(cd$Weight[cd$Microbiome == "Lab"], cd$Lean[cd$Microbiome == "Lab"])
-
 cor.test(cd$Weight[cd$Microbiome == "Wildling"], cd$Lean[cd$Microbiome == "Wildling"])
+
+#correlation of microbiota with HF or CD
+cor.test(cd$Weight[cd$Microbiome == "Lab" & cd$Diet == "High Fat"], cd$Lean[cd$Microbiome == "Lab" & cd$Diet == "High Fat"])
+cor.test(cd$Weight[cd$Microbiome == "Wildling" & cd$Diet == "High Fat"], cd$Lean[cd$Microbiome == "Wildling" & cd$Diet == "High Fat"])
+
+
+
+cor.test(cd$Weight[cd$Microbiome == "Lab" & cd$Diet == "Chow"], cd$Lean[cd$Microbiome == "Lab" & cd$Diet == "Chow"])
+cor.test(cd$Weight[cd$Microbiome == "Wildling" & cd$Diet == "Chow"], cd$Lean[cd$Microbiome == "Wildling" & cd$Diet == "Chow"])
 ```
