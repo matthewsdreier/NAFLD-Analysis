@@ -196,7 +196,6 @@ pPercWeightFemale <- ggplot(cdFemale, aes(x = cdFemale$Days, y = cdFemale$PercWe
   xlim(limits = c(0, maxDaysFemale)) +
   ylim(limits = c(minPercWeightFemale, maxPercWeightFemale)) +
   scale_colour_manual("", values = cols, breaks = c("Lab Chow", "Lab Fat", "Wild Chow", "Wild Fat")) +
-  theme_set(theme_bw(base_size = 20)) +
   theme(plot.title = element_text(hjust = 0.5))
   
   pPercWeightFemale
@@ -231,7 +230,6 @@ pBinWeight <- ggplot(sub, aes(x = sub$Days, y = sub$PercWeight, color = sub$Weig
   xlim(limits = c(0, maxDaysFemale)) +
   ylim(limits = c(minPercWeightFemale, maxPercWeightFemale)) +
   scale_colour_manual("", values = cols, breaks = c("high", "low"), labels = c(">50% Gain", "<50% Gain")) +
-  theme_set(theme_bw(base_size = 20)) +
   theme(plot.title = element_text(hjust = 0.5))
 
 
@@ -240,7 +238,6 @@ pBinTemp <- ggplot(sub, aes(x = sub$Days, y = sub$Temperature, color = sub$Weigh
   geom_point() + 
   labs(x = "Day", y = "Temperature (°C)", title = "Wildling High Fat Mice") +
   scale_colour_manual("", values = cols, breaks = c("high", "low"), labels = c(">50% Gain", "<50% Gain")) +
-  theme_set(theme_bw(base_size = 20)) +
   theme(plot.title = element_text(hjust = 0.5))
 
 pBinGlucose <- ggplot(sub, aes(x = sub$Days, y = sub$Glucose, color = sub$WeightGain)) +
@@ -248,7 +245,6 @@ pBinGlucose <- ggplot(sub, aes(x = sub$Days, y = sub$Glucose, color = sub$Weight
   labs(x = "Day", y = "Blood Glucose (mg/dL)", title = "Wildling High Fat Mice") +
   xlim(limits = c(0, maxDaysFemale)) +
   scale_colour_manual("", values = cols, breaks = c("high", "low"), labels = c(">50% Gain", "<50% Gain")) +
-  theme_set(theme_bw(base_size = 20)) +
   theme(plot.title = element_text(hjust = 0.5))
 
 ```
