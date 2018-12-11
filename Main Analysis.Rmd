@@ -202,17 +202,45 @@ pPercWeightFemale <- ggplot(cdFemale, aes(x = cdFemale$Days, y = cdFemale$PercWe
   
 ##Bin weights
   #create new variable for weight gain and set it to high when percent weight exceeds 150
-  cd$WeightGain <- "low"
-  cd$WeightGain[cd$PercWeight > 150] <- "high"
+cd$WeightGain <- "low"
+cd$WeightGain[cd$PercWeight > 150] <- "high"
+
+
+##Find day mouse crosses weight threshold
+weightThreshConds <- c()
+weightThreshDays <- c()
   
-  #for each mouse
-  for (mouse in unique(cd$UID)) {
+  #for each condition
+for (condition in unique(cd$Condition)) {
+  
+  #for each mouse in that condition
+  for (mouse in unique(cd$UID[cd$Condition == condition])) {
     
-    #if the mouse ever has "high" weight gain, weight gain variable to "high" in all rows
-    if ("high" %in% unique(cd$WeightGain[cd$UID == mouse])) {
-      cd$WeightGain[cd$UID == mouse] <- "high"
+    if (length(unique(cd$WeightGain[cd$Condition == condition & cd$UID == mouse])) == 2) {
+      weightThreshConds <- c(weightThreshConds, condition)
+      weightThreshDays <- c(weightThreshDays, min(cd$Days[cd$UID == mouse & cd$Condition == condition & cd$WeightGain == "high"]))
     }
+    
   }
+  
+}
+
+ggplot() +
+  geom_violin(aes(x = weightThreshConds, y = weightThreshDays, fill = weightThreshConds)) +
+  geom_boxplot(aes(x = weightThreshConds, y = weightThreshDays, fill = weightThreshConds), color = "black", width = 0.2) +
+  geom_jitter(aes(x = weightThreshConds, y = weightThreshDays), color = "white", fill = "black", pch = 21) +
+  scale_fill_manual(values = cols[c(1,2,4)], breaks = c("Lab Chow", "Lab Fat", "Wild Fat")) +
+  labs(x = NULL, y = "# Days to 150% Weight") +
+  theme(legend.position = "none")
+
+#for each mouse
+for (mouse in unique(cd$UID)) {
+  
+  #if the mouse ever has "high" weight gain, weight gain variable to "high" in all rows
+  if ("high" %in% unique(cd$WeightGain[cd$UID == mouse])) {
+    cd$WeightGain[cd$UID == mouse] <- "high"
+  }
+}
 
 ##Create table with weight gain category by condition
 prop.table(table(cd$WeightGain[cd$Days == 0], cd$Condition[cd$Days == 0]), margin = 2)
