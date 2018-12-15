@@ -197,7 +197,7 @@ grid.arrange(plotLeanMassLabvsWildling, plotLeanMassLabHFvsWildlingHF, ncol = 1)
 #correlation for WIldling
  cor.test(cd$Weight[cd$Microbiome == "Wildling"], cd$Fat[cd$Microbiome == "Wildling"], method = "pearson")
 
-
+wilcox.test(WildChow$Lean, LChow$Lean)
 
 #correlation for lean mas
 cor.test(cd$Weight, cd$Lean, method = "pearson")
