@@ -158,18 +158,12 @@ for (mouse in unique(cd$UID)) {
 cd$PercWeight <- cd$PercWeight * 100
 
 ##Plot weight
-  #subset data for females and define boundaries
 cdFemale <- subset(cd, cd$Sex == "Female")
-maxDaysFemale <- max(cdFemale$Days)
-minWeightFemale <- min(cdFemale$Weight)
-maxWeightFemale <- max(cdFemale$Weight)
 
 #create graph
-pWeightFemale <- ggplot(cdFemale, aes(x = cdFemale$Days, y = cdFemale$Weight, color = cdFemale$Color)) +
+pWeightFemale <- ggplot(cdFemale, aes(x = cdFemale$Days, y = cdFemale$Weight, color = cdFemale$Condition)) +
   geom_smooth() +
   labs(x = "Day", y = "Weight (g)", title = "Absolute Weight of Female Mice") +
-  xlim(limits = c(0, maxDaysFemale)) +
-  ylim(limits = c(minWeightFemale, maxWeightFemale)) +
   scale_colour_manual("", values = cols, breaks = c("Lab Chow", "Lab Fat", "Wild Chow", "Wild Fat")) +
   theme_set(theme_bw(base_size = 20)) +
   theme(plot.title = element_text(hjust = 0.5))
@@ -177,16 +171,11 @@ pWeightFemale <- ggplot(cdFemale, aes(x = cdFemale$Days, y = cdFemale$Weight, co
   pWeightFemale
 
 ##Plot proportional weight
-  #define boundaries
-minPercWeightFemale <- min(cdFemale$PercWeight)
-maxPercWeightFemale <- max(cdFemale$PercWeight)
 
 #create graph
-pPercWeightFemale <- ggplot(cdFemale, aes(x = cdFemale$Days, y = cdFemale$PercWeight, color = cdFemale$Color)) +
+pPercWeightFemale <- ggplot(cdFemale, aes(x = cdFemale$Days, y = cdFemale$PercWeight, color = cdFemale$Condition)) +
   geom_smooth() +
   labs(x = "Day", y = "Proportional Weight (%)", title = "Proportional Weight of Female Mice") +
-  xlim(limits = c(0, maxDaysFemale)) +
-  ylim(limits = c(minPercWeightFemale, maxPercWeightFemale)) +
   scale_colour_manual("", values = cols, breaks = c("Lab Chow", "Lab Fat", "Wild Chow", "Wild Fat")) +
   theme(plot.title = element_text(hjust = 0.5))
   
@@ -202,21 +191,23 @@ cd$WeightGain[cd$PercWeight > 150] <- "high"
 weightThreshConds <- c()
 weightThreshDays <- c()
   
-  #for each condition
+#for each condition
 for (condition in unique(cd$Condition)) {
   
   #for each mouse in that condition
   for (mouse in unique(cd$UID[cd$Condition == condition])) {
     
+    #if that mouse crosses weight threshold
     if (length(unique(cd$WeightGain[cd$Condition == condition & cd$UID == mouse])) == 2) {
+      
+      #update lists
       weightThreshConds <- c(weightThreshConds, condition)
       weightThreshDays <- c(weightThreshDays, min(cd$Days[cd$UID == mouse & cd$Condition == condition & cd$WeightGain == "high"]))
     }
-    
   }
-  
 }
 
+##plot day mice cross weight threshold
 ggplot() +
   geom_violin(aes(x = weightThreshConds, y = weightThreshDays, fill = weightThreshConds)) +
   geom_boxplot(aes(x = weightThreshConds, y = weightThreshDays, fill = weightThreshConds), color = "black", width = 0.2) +
@@ -239,33 +230,32 @@ prop.table(table(cd$WeightGain[cd$Days == 0], cd$Condition[cd$Days == 0]), margi
 
 #plot weight gain bins
 barplot(prop.table(table(cd$WeightGain[cd$Days == 0], cd$Condition[cd$Days == 0]), margin = 2), col = c("black", "light gray"), main = "Weight Gain of Female Mice", ylab = "Proportion")
-
 legend("bottomright", inset = 0.02, legend = c(">50% Gain", "<50% Gain"), fill = c("black", "light gray"))
 
-sub <- subset(cdFemale, cdFemale$Condition == "Wild Fat")
-
-pBinWeight <- ggplot(sub, aes(x = sub$Days, y = sub$PercWeight, color = sub$WeightGain)) +
-  geom_smooth() +
-  labs(x = "Day", y = "Proportional Weight (%)", title = "Wildling High Fat Mice") +
-  xlim(limits = c(0, maxDaysFemale)) +
-  ylim(limits = c(minPercWeightFemale, maxPercWeightFemale)) +
-  scale_colour_manual("", values = cols, breaks = c("high", "low"), labels = c(">50% Gain", "<50% Gain")) +
-  theme(plot.title = element_text(hjust = 0.5))
-
-
-pBinTemp <- ggplot(sub, aes(x = sub$Days, y = sub$Temperature, color = sub$WeightGain)) +
-  geom_smooth() +
-  geom_point() + 
-  labs(x = "Day", y = "Temperature (°C)", title = "Wildling High Fat Mice") +
-  scale_colour_manual("", values = cols, breaks = c("high", "low"), labels = c(">50% Gain", "<50% Gain")) +
-  theme(plot.title = element_text(hjust = 0.5))
-
-pBinGlucose <- ggplot(sub, aes(x = sub$Days, y = sub$Glucose, color = sub$WeightGain)) +
-  geom_smooth() +
-  labs(x = "Day", y = "Blood Glucose (mg/dL)", title = "Wildling High Fat Mice") +
-  xlim(limits = c(0, maxDaysFemale)) +
-  scale_colour_manual("", values = cols, breaks = c("high", "low"), labels = c(">50% Gain", "<50% Gain")) +
-  theme(plot.title = element_text(hjust = 0.5))
+# sub <- subset(cdFemale, cdFemale$Condition == "Wild Fat")
+# 
+# pBinWeight <- ggplot(sub, aes(x = sub$Days, y = sub$PercWeight, color = sub$WeightGain)) +
+#   geom_smooth() +
+#   labs(x = "Day", y = "Proportional Weight (%)", title = "Wildling High Fat Mice") +
+#   xlim(limits = c(0, maxDaysFemale)) +
+#   ylim(limits = c(minPercWeightFemale, maxPercWeightFemale)) +
+#   scale_colour_manual("", values = cols, breaks = c("high", "low"), labels = c(">50% Gain", "<50% Gain")) +
+#   theme(plot.title = element_text(hjust = 0.5))
+# 
+# 
+# pBinTemp <- ggplot(sub, aes(x = sub$Days, y = sub$Temperature, color = sub$WeightGain)) +
+#   geom_smooth() +
+#   geom_point() + 
+#   labs(x = "Day", y = "Temperature (°C)", title = "Wildling High Fat Mice") +
+#   scale_colour_manual("", values = cols, breaks = c("high", "low"), labels = c(">50% Gain", "<50% Gain")) +
+#   theme(plot.title = element_text(hjust = 0.5))
+# 
+# pBinGlucose <- ggplot(sub, aes(x = sub$Days, y = sub$Glucose, color = sub$WeightGain)) +
+#   geom_smooth() +
+#   labs(x = "Day", y = "Blood Glucose (mg/dL)", title = "Wildling High Fat Mice") +
+#   xlim(limits = c(0, maxDaysFemale)) +
+#   scale_colour_manual("", values = cols, breaks = c("high", "low"), labels = c(">50% Gain", "<50% Gain")) +
+#   theme(plot.title = element_text(hjust = 0.5))
 
 ```
 
