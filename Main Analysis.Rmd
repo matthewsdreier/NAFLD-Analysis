@@ -13,10 +13,6 @@ output: html_document
 
 #load packages
 library(ggplot2)
-library(rlist)
-library(ggpubr)
-library(gridBase)
-library(gridExtra)
 
 ##function to change names of columns
 changeColName <- function(df, oldName, newName) {
@@ -44,7 +40,7 @@ cd$X.1 <- NULL
 cd$Date <- as.Date(cd$Date, "%m/%d/%y")
 
 ##Calculate days after start
-#initiialize days variable
+  #initiialize days variable
 cd$Days <- NA
 
 #for each sex
@@ -67,7 +63,7 @@ for (sex in unique(cd$Sex)){
 
 
 ##Create unique identifier for each mouse
-#initialize UID variable
+  #initialize UID variable
 cd$UID <- NA
 
 #create column that uniquely identifies each mouse
@@ -103,7 +99,6 @@ for (mouse in unique(cd$Temp)) {
 #remove temp variable
 cd$Temp <- NULL
 
-
 ##Create function to remove outliers
   #df: The data frame containing var
   #var: The variable from which to remove outliers
@@ -135,6 +130,7 @@ removeOutliers <- function(df, var, tol) {
 
 ##Create new variable for condition (combination of microbiome and food)
 cd$Condition <- paste(cd$Microbiome, cd$Diet)
+cols <- c("darkturquoise","goldenrod1", "blue3", "darkolivegreen4")
 
 ```
 
@@ -160,10 +156,6 @@ for (mouse in unique(cd$UID)) {
 
 #convert proportional weight to a percentage
 cd$PercWeight <- cd$PercWeight * 100
-
-#colors for graphing
-cd$Color <- paste(cd$Microbiome, cd$Diet)
-cols <- c("darkturquoise","goldenrod1", "blue3", "darkolivegreen4")
 
 ##Plot weight
   #subset data for females and define boundaries
