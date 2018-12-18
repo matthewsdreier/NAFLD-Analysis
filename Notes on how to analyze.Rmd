@@ -13,7 +13,7 @@ Correlate cage temperature with cage weight
 Correlation between temp and weight per mouse
 
 
-When do mice cross a certain threshold of weight gain? Eg after 30 days on HFD for Lab and after 70 d for wildling?
+When do mice cross a certain threshold of weight gain? Eg after 30 days on HFD for Lab and after 70 d for wildling? (DONE)
 
 Weight Gain per week? How much weight in % do mice gain within one week? Does the weight gain in the end of the experiment correlate with the drop in temperature?
 
