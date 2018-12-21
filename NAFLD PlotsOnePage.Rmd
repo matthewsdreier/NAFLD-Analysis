@@ -39,15 +39,15 @@ for (sex in unique(cd$Gender)){
   }
 }
 
-minval <- min(cd$Weight[cd$Gender == "Female"], na.rm = TRUE)
-maxval <- max(cd$Weight[cd$Gender == "Female"], na.rm = TRUE)
+minval <- min(cd$Weight[cd$Gender == "Female"], na.rm = FALSE)
+maxval <- max(cd$Weight[cd$Gender == "Female"], na.rm = FALSE)
 
-minvalmales <- min(cd$Weight[cd$Gender == "Male"], na.rm = TRUE)
-maxvalmales <- max(cd$Weight[cd$Gender == "Male"], na.rm = TRUE)
+minvalmales <- min(cd$Weight[cd$Gender == "Male"], na.rm = FALSE)
+maxvalmales <- max(cd$Weight[cd$Gender == "Male"], na.rm = FALSE)
 
-maxdays <- max(cd$Days[cd$Gender == "Female"], na.rm = TRUE)
-maxdaysmales <- max(cd$Days[cd$Gender == "Male"], na.rm = TRUE)
-mindays <- min(cd$Days, na.rm = TRUE)
+maxdays <- max(cd$Days[cd$Gender == "Female"], na.rm = FALSE)
+maxdaysmales <- max(cd$Days[cd$Gender == "Male"], na.rm = FALSE)
+mindays <- min(cd$Days, na.rm = FALSE)
 sex <- "Female"
 sex2 <- "Male"
 
