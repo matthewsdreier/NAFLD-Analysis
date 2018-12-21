@@ -7,12 +7,12 @@ output:
   pdf_document: default
 ---
 
-``````{r setup, eval = TRUE, echo = FALSE, message = FALSE, warning = FALSE}
+```{r setup, eval = TRUE, echo = FALSE, message = FALSE, warning = FALSE}
 
 # setwd("~/Desktop/Research/NAFLD/Experiments/All Experiments together")
 
 library(ggplot2)
-library(gdata)
+#library(gdata)
 library(rlist)
 library(ggpubr)
 library(gridBase)
@@ -38,6 +38,8 @@ for (sex in unique(cd$Gender)){
     }
   }
 }
+
+cd$Weight <- as.double(cd$Weight)
 
 minval <- min(cd$Weight[cd$Gender == "Female"], na.rm = TRUE)
 maxval <- max(cd$Weight[cd$Gender == "Female"], na.rm = TRUE)
